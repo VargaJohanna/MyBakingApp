@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/dot_icon"
+        android:layout_width="6dp"
+        android:layout_height="6dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="@dimen/ingredients_horizontal_margin"
+        android:layout_marginEnd="@dimen/ingredients_horizontal_margin"
+        android:background="@drawable/ic_circle_davys_grey_solid" />
+
+    <TextView
+        android:id="@+id/quantityText"
+        style="@style/IngredientsTextStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/dot_icon"
+        android:layout_toRightOf="@id/dot_icon"
+        android:text="@string/example_quantity"
+        tools:ignore="RtlHardcoded" />
+
+    <TextView
+        android:id="@+id/measureText"
+        style="@style/IngredientsTextStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/quantityText"
+        android:layout_toRightOf="@id/quantityText"
+        android:text="@string/example_measure" />
+
+    <TextView
+        android:id="@+id/ingredient"
+        style="@style/IngredientsTextStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/measureText"
+        android:layout_toRightOf="@id/measureText"
+        android:text="@string/ingredient" />
+
+</RelativeLayout>

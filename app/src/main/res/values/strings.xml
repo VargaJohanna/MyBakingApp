@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">My Baking App</string>
-    <string name="no_internet_message">Someting went wrong. Please check oyur internet connection...</string>
+    <string name="no_internet_message">Something went wrong. Please check oyur internet connection…</string>
+    <string name="example_quantity">4</string>
+    <string name="example_measure">TSP</string>
+    <string name="ingredient">vanilla</string>
+    <string name="ingredients_title">Ingredients:</string>
+    <string name="method_title">Method:</string>
+    <string name="example_short_description">Prep the cookie crust.</string>
+    <string name="_1">1</string>
 </resources>

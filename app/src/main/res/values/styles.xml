@@ -8,10 +8,34 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="TextViewStyle">
+    <style name="RecipeTextStyle">
         <item name="android:textSize">@dimen/text_size_normal</item>
         <item name="android:textStyle">bold</item>
         <item name="android:padding">@dimen/padding_large</item>
+    </style>
+
+    <style name="TitleTextStyle">
+        <item name="android:textSize">@dimen/text_size_large</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:layout_margin">@dimen/margin_normal</item>
+    </style>
+
+    <style name="IngredientsTextStyle">
+        <item name="android:textSize">@dimen/text_size_normal</item>
+        <item name="android:layout_marginTop">@dimen/margin_normal</item>
+        <item name="android:layout_marginBottom">@dimen/margin_normal</item>
+        <item name="android:paddingLeft">@dimen/padding_extra_small</item>
+        <item name="android:paddingRight">@dimen/padding_extra_small</item>
+    </style>
+
+    <style name="ProgressBarStyle">
+        <item name="android:layout_width">@dimen/progressBarSize</item>
+        <item name="android:layout_height">@dimen/progressBarSize</item>
+        <item name="android:layout_marginTop">@dimen/margin_normal</item>
+        <item name="android:layout_marginStart">@dimen/margin_normal</item>
+        <item name="android:layout_marginEnd">@dimen/margin_normal</item>
+        <item name="android:layout_marginBottom">@dimen/margin_normal</item>
+        <item name="android:visibility">invisible</item>
     </style>
 
 </resources>
