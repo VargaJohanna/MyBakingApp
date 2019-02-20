@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="progressBarSize">60dp</dimen>
+    <dimen name="text_size_normal">16sp</dimen>
+    <dimen name="margin_normal">16dp</dimen>
+    <dimen name="padding_normal">16dp</dimen>
+    <dimen name="padding_large">32dp</dimen>
+    <integer name="recipe_list_columns">1</integer>
+</resources>
