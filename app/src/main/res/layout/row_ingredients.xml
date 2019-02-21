@@ -14,7 +14,7 @@
         android:background="@drawable/ic_circle_davys_grey_solid" />
 
     <TextView
-        android:id="@+id/quantityText"
+        android:id="@+id/quantity_text"
         style="@style/IngredientsTextStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -24,21 +24,21 @@
         tools:ignore="RtlHardcoded" />
 
     <TextView
-        android:id="@+id/measureText"
+        android:id="@+id/measure_text"
         style="@style/IngredientsTextStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/quantityText"
-        android:layout_toRightOf="@id/quantityText"
+        android:layout_toEndOf="@id/quantity_text"
+        android:layout_toRightOf="@id/quantity_text"
         android:text="@string/example_measure" />
 
     <TextView
-        android:id="@+id/ingredient"
+        android:id="@+id/ingredient_text"
         style="@style/IngredientsTextStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/measureText"
-        android:layout_toRightOf="@id/measureText"
+        android:layout_toEndOf="@id/measure_text"
+        android:layout_toRightOf="@id/measure_text"
         android:text="@string/ingredient" />
 
 </RelativeLayout>

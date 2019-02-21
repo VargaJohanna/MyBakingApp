@@ -1,4 +1,4 @@
-package com.movies.mybakingapp.viewmodals;
+package com.movies.mybakingapp.viewmodels;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;

@@ -2,6 +2,7 @@ package com.movies.mybakingapp.activities;
 
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -17,7 +18,7 @@ import com.movies.mybakingapp.databinding.ActivityMainRecipeListBinding;
 import com.movies.mybakingapp.modal.Recipe;
 import com.movies.mybakingapp.network.GetRecipesService;
 import com.movies.mybakingapp.network.RetrofitInstance;
-import com.movies.mybakingapp.viewmodals.MainRecipeListViewModel;
+import com.movies.mybakingapp.viewmodels.MainRecipeListViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +65,8 @@ public class MainRecipeListActivity extends AppCompatActivity implements RecipeA
 
     @Override
     public void onItemClick(Recipe recipe) {
-        Toast.makeText(this, recipe.getName(), Toast.LENGTH_SHORT).show();
+        Intent recipeDetailActivity = new Intent(this, RecipeDetailActivity.class);
+        recipeDetailActivity.putExtra(RecipeDetailActivity.RECIPE_OBJECT_FLAG, recipe);
+        startActivity(recipeDetailActivity);
     }
 }
