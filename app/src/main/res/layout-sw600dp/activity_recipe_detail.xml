@@ -8,27 +8,21 @@
 
     <FrameLayout
         android:id="@+id/recipe_detail_fragment_framelayout"
-        android:layout_width="307dp"
+        android:layout_width="0dp"
+        app:layout_constraintWidth_default="percent"
+        app:layout_constraintWidth_percent="0.3"
         android:layout_height="match_parent"
-        app:layout_constraintEnd_toStartOf="@+id/guideline" />
-
-    <View
-        android:layout_width="1dp"
-        android:layout_height="match_parent"
-        android:background="@color/divider" />
+        android:layout_marginStart="@dimen/margin_extra_small"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <FrameLayout
         android:id="@+id/step_detail_fragment_framelayout"
-        android:layout_width="228dp"
+        android:layout_width="0dp"
+        app:layout_constraintWidth_default="percent"
+        app:layout_constraintWidth_percent="0.7"
+        app:layout_constraintHorizontal_weight="1"
         android:layout_height="match_parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/guideline"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <android.support.constraint.Guideline
-        android:id="@+id/guideline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_begin="350dp" />
 </android.support.constraint.ConstraintLayout>

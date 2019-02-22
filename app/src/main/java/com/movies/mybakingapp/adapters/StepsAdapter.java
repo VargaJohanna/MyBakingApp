@@ -1,6 +1,8 @@
 package com.movies.mybakingapp.adapters;
 
+import android.graphics.Color;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +17,7 @@ import java.util.List;
 public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapterViewHolder> {
     List<Steps> stepsList;
     final private ItemClickListenerSteps itemClickListenerSteps;
+    private int selectedPosition = RecyclerView.NO_POSITION;
 
     public StepsAdapter(List<Steps> stepsList, ItemClickListenerSteps itemClickListenerSteps) {
         this.stepsList = stepsList;
@@ -32,7 +35,14 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapter
     @Override
     public void onBindViewHolder(@NonNull StepsAdapter.StepsAdapterViewHolder viewHolder, int i) {
         viewHolder.stepShortDescription.setText(stepsList.get(i).getShortDescription());
-        viewHolder.stepNumber.setText(String.valueOf(i + 1));
+        viewHolder.stepShortDescription.setSelected(selectedPosition == i);
+        if(selectedPosition == i) {
+            viewHolder.itemView.setBackgroundColor(ContextCompat.getColor(viewHolder.stepShortDescription.getContext(), R.color.colorAccent));
+            viewHolder.stepShortDescription.setTextColor(ContextCompat.getColor(viewHolder.stepShortDescription.getContext(), R.color.primary_text));
+        } else {
+            viewHolder.itemView.setBackgroundColor(Color.WHITE);
+            viewHolder.stepShortDescription.setTextColor(ContextCompat.getColor(viewHolder.stepShortDescription.getContext(), R.color.secondary_text));
+        }
     }
 
     @Override
@@ -42,18 +52,20 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapter
 
     public class StepsAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final TextView stepShortDescription;
-        private final TextView stepNumber;
 
         public StepsAdapterViewHolder(@NonNull View itemView) {
             super(itemView);
             stepShortDescription = itemView.findViewById(R.id.step_short_description);
-            stepNumber = itemView.findViewById(R.id.number_of_step);
             itemView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
+            notifyItemChanged(selectedPosition);
+            selectedPosition = getLayoutPosition();
+            notifyItemChanged(selectedPosition);
             itemClickListenerSteps.onItemClick(stepsList.get(getAdapterPosition()));
+
         }
     }
 

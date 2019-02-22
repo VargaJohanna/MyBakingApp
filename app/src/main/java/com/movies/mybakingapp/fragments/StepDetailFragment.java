@@ -1,6 +1,8 @@
 package com.movies.mybakingapp.fragments;
 
 import android.arch.lifecycle.ViewModelProviders;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -45,8 +47,11 @@ public class StepDetailFragment extends Fragment {
         SimpleExoPlayerView simpleExoPlayerView = rootView.findViewById(R.id.playerView);
 
         stepDetail.setText(step.getDescription());
-        viewModel.initialiseMediaSession(getActivity(), MEDIA_SESSION_TAG, viewModel.getExoPlayer());
-        viewModel.initialisePlayer(simpleExoPlayerView, Uri.parse(step.getVideoURL()), viewModel.getExoPlayer(), getActivity());
+        if(!step.getThumbnailURL().isEmpty() || !step.getVideoURL().isEmpty() ) {
+            simpleExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.grey_background));
+            viewModel.initialiseMediaSession(getActivity(), MEDIA_SESSION_TAG, viewModel.getExoPlayer());
+            viewModel.initialisePlayer(simpleExoPlayerView, getUri(), viewModel.getExoPlayer(), getActivity());
+        }
         return rootView;
     }
 
@@ -60,5 +65,17 @@ public class StepDetailFragment extends Fragment {
         super.onDestroy();
         viewModel.releasePlayer(viewModel.getExoPlayer());
         viewModel.getMediaSession(getActivity(), MEDIA_SESSION_TAG).setActive(false);
+    }
+
+    private Uri getUri() {
+        String url = "";
+        if(step.getVideoURL() == null && step.getThumbnailURL() != null) {
+            url = step.getThumbnailURL();
+        } else if (step.getVideoURL() != null && step.getThumbnailURL() == null) {
+            url = step.getVideoURL();
+        } else if(step.getVideoURL() != null && step.getThumbnailURL() != null) {
+            url = step.getVideoURL();
+        }
+        return Uri.parse(url);
     }
 }
