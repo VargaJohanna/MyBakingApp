@@ -14,11 +14,11 @@ import java.util.List;
 
 public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapterViewHolder> {
     List<Steps> stepsList;
-//    final private ItemClickListener itemClickListener;
+    final private ItemClickListenerSteps itemClickListenerSteps;
 
-    public StepsAdapter(List<Steps> stepsList) {
+    public StepsAdapter(List<Steps> stepsList, ItemClickListenerSteps itemClickListenerSteps) {
         this.stepsList = stepsList;
-//        this.itemClickListener = itemClickListener;
+        this.itemClickListenerSteps = itemClickListenerSteps;
     }
 
     @NonNull
@@ -40,7 +40,7 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapter
         return stepsList.size();
     }
 
-    public class StepsAdapterViewHolder extends RecyclerView.ViewHolder {
+    public class StepsAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final TextView stepShortDescription;
         private final TextView stepNumber;
 
@@ -48,15 +48,16 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapter
             super(itemView);
             stepShortDescription = itemView.findViewById(R.id.step_short_description);
             stepNumber = itemView.findViewById(R.id.number_of_step);
+            itemView.setOnClickListener(this);
         }
 
-//        @Override
-//        public void onClick(View view) {
-//            itemClickListener.onItemClick(stepsList.get(getAdapterPosition()));
-//        }
+        @Override
+        public void onClick(View view) {
+            itemClickListenerSteps.onItemClick(stepsList.get(getAdapterPosition()));
+        }
     }
 
-    public interface ItemClickListener {
+    public interface ItemClickListenerSteps {
         void onItemClick(Steps step);
     }
 }

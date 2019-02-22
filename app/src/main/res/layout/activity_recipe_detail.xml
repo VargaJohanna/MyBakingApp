@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".activities.RecipeDetailActivity">
+    tools:context=".activities.RecipeInstructionsActivity">
 
     <FrameLayout
         android:id="@+id/recipe_detail_fragment_framelayout"

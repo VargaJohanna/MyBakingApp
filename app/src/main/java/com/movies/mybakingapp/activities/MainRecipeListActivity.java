@@ -19,6 +19,7 @@ import com.movies.mybakingapp.modal.Recipe;
 import com.movies.mybakingapp.network.GetRecipesService;
 import com.movies.mybakingapp.network.RetrofitInstance;
 import com.movies.mybakingapp.viewmodels.MainRecipeListViewModel;
+import com.movies.mybakingapp.viewmodels.RecipeDetailViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,8 +66,8 @@ public class MainRecipeListActivity extends AppCompatActivity implements RecipeA
 
     @Override
     public void onItemClick(Recipe recipe) {
-        Intent recipeDetailActivity = new Intent(this, RecipeDetailActivity.class);
-        recipeDetailActivity.putExtra(RecipeDetailActivity.RECIPE_OBJECT_FLAG, recipe);
+        Intent recipeDetailActivity = new Intent(this, RecipeInstructionsActivity.class);
+        recipeDetailActivity.putExtra(RecipeInstructionsActivity.RECIPE_OBJECT_FLAG, recipe);
         startActivity(recipeDetailActivity);
     }
 }

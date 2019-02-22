@@ -8,9 +8,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/cupcake"
+        android:icon="@drawable/cupcake_2388217_960_720"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/cupcake"
+        android:roundIcon="@drawable/cupcake_2388217_960_720"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
@@ -21,7 +21,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.RecipeDetailActivity"></activity>
+        <activity android:name=".activities.RecipeInstructionsActivity"
+            android:parentActivityName=".activities.MainRecipeListActivity"/>
     </application>
 
 </manifest>

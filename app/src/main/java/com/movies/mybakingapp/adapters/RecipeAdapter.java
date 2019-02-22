@@ -49,7 +49,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeAdap
         RecipeAdapterViewHolder(@NonNull View itemView) {
             super(itemView);
             recipeName = itemView.findViewById(R.id.recipe_name);
-            recipeName.setOnClickListener(this);
+            itemView.setOnClickListener(this);
         }
 
         @Override
