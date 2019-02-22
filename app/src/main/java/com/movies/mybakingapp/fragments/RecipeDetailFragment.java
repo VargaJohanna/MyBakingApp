@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.movies.mybakingapp.R;
+import com.movies.mybakingapp.activities.RecipeInstructionsActivity;
 import com.movies.mybakingapp.adapters.IngredientsAdapter;
 import com.movies.mybakingapp.adapters.StepsAdapter;
 import com.movies.mybakingapp.modal.Steps;
@@ -48,6 +49,7 @@ public class RecipeDetailFragment extends Fragment implements StepsAdapter.ItemC
 
     @Override
     public void onItemClick(Steps step) {
+        RecipeInstructionsActivity.isStepClicked = true;
         detailViewModel.setCurrentStep(step);
     }
 }

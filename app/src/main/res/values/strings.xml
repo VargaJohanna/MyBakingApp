@@ -5,7 +5,7 @@
     <string name="example_measure">TSP</string>
     <string name="ingredient">vanilla</string>
     <string name="ingredients_title">Ingredients:</string>
-    <string name="method_title">Method:</string>
+    <string name="method_title">How to make it:</string>
     <string name="example_short_description">Prep the cookie crust.</string>
     <string name="_1">1</string>
 </resources>

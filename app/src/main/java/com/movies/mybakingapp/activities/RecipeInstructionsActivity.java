@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.movies.mybakingapp.R;
 import com.movies.mybakingapp.fragments.RecipeDetailFragment;
@@ -19,12 +20,16 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
 
     public static final String RECIPE_OBJECT_FLAG = "recipe_flag";
     public static final String STEP_KEY = "step";
+    public static final String RECIPE_FRAGMENT = "RecipeDetailFragment";
+    public static final String STEP_FRAGMENT = "StepDetailFragment";
+    public static final String FROM_STEP_TAG = "FromStep";
     private Intent intent;
     private Recipe recipe;
     private RecipeDetailViewModel detailViewModel;
     private FragmentManager fragmentManager;
     private RecipeDetailFragment recipeFragment;
-    private boolean twoPane = false;
+    private boolean twoPane;
+    public static boolean isStepClicked;
 
 
     @Override
@@ -34,17 +39,19 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
         intent = getIntent();
         detailViewModel = ViewModelProviders.of(this).get(RecipeDetailViewModel.class);
         fragmentManager = getSupportFragmentManager();
-        if(intent.hasExtra(RECIPE_OBJECT_FLAG)) {
+        isStepClicked = false;
+        twoPane = false;
+        if (intent.hasExtra(RECIPE_OBJECT_FLAG)) {
             recipe = intent.getParcelableExtra(RECIPE_OBJECT_FLAG);
             detailViewModel.setCurrentRecipe(recipe);
         }
-        if(savedInstanceState == null) {
-            if(findViewById(R.id.step_detail_fragment_framelayout) != null) {
-                twoPane = true;
-            }
+        if (findViewById(R.id.step_detail_fragment_framelayout) != null) {
+            twoPane = true;
+        }
+        if (savedInstanceState == null) {
             recipeFragment = new RecipeDetailFragment();
             fragmentManager.beginTransaction()
-                    .add(R.id.recipe_detail_fragment_framelayout, recipeFragment)
+                    .add(R.id.recipe_detail_fragment_framelayout, recipeFragment, RECIPE_FRAGMENT)
                     .commit();
         }
         observeActiveStep();
@@ -57,16 +64,30 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
             public void onChanged(@Nullable Steps step) {
                 StepDetailFragment stepDetailFragment = new StepDetailFragment();
                 stepDetailFragment.setStep(step);
-                if(twoPane) {
+                if (twoPane) {
                     fragmentManager.beginTransaction()
-                            .replace(R.id.step_detail_fragment_framelayout, stepDetailFragment)
+                            .replace(R.id.step_detail_fragment_framelayout, stepDetailFragment, STEP_FRAGMENT)
                             .commit();
-                } else {
+                } else if (!twoPane && isStepClicked){
                     fragmentManager.beginTransaction()
-                            .replace(R.id.recipe_detail_fragment_framelayout, stepDetailFragment)
+                            .replace(R.id.recipe_detail_fragment_framelayout, stepDetailFragment, STEP_FRAGMENT)
+                            .addToBackStack(FROM_STEP_TAG)
                             .commit();
                 }
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!twoPane) {
+            if (getSupportFragmentManager().findFragmentByTag(STEP_FRAGMENT) != null) {
+                getSupportFragmentManager().popBackStack(FROM_STEP_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            } else {
+                super.onBackPressed();
+            }
+        } else {
+            super.onBackPressed();
+        }
     }
 }

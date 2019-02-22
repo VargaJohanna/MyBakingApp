@@ -35,6 +35,8 @@ public class StepDetailFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         viewModel = ViewModelProviders.of(this).get(RecipeDetailViewModel.class);
         viewModel.setExoPlayer(getActivity());
+        RecipeInstructionsActivity.isStepClicked = true;
+
         if (savedInstanceState != null) {
             step = savedInstanceState.getParcelable(RecipeInstructionsActivity.STEP_KEY);
         }

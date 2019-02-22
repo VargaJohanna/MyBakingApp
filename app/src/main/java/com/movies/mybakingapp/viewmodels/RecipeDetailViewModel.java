@@ -5,13 +5,10 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
-import android.media.session.PlaybackState;
 import android.net.Uri;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -34,7 +31,7 @@ import com.movies.mybakingapp.fragments.StepDetailFragment;
 import com.movies.mybakingapp.modal.Recipe;
 import com.movies.mybakingapp.modal.Steps;
 
-public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer.EventListener{
+public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer.EventListener {
     private MutableLiveData<Steps> currentStep;
     private Recipe currentRecipe;
     private MediaSessionCompat mediaSession;
@@ -63,10 +60,10 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
     }
 
     public void setExoPlayer(Context context) {
-        if(exoPlayer == null) {
+        if (exoPlayer == null) {
             TrackSelector trackSelector = new DefaultTrackSelector();
             LoadControl loadControl = new DefaultLoadControl();
-            this.exoPlayer = ExoPlayerFactory.newSimpleInstance(context.getApplicationContext(),trackSelector, loadControl);
+            this.exoPlayer = ExoPlayerFactory.newSimpleInstance(context.getApplicationContext(), trackSelector, loadControl);
         }
     }
 
@@ -88,14 +85,14 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
     }
 
     public MediaSessionCompat getMediaSession(Context context, String activityNameTag) {
-        if(mediaSession == null) {
+        if (mediaSession == null) {
             this.mediaSession = new MediaSessionCompat(context, activityNameTag);
         }
         return mediaSession;
     }
 
     public PlaybackStateCompat.Builder getStateBuilder() {
-        if(playbackStateBuilder == null) {
+        if (playbackStateBuilder == null) {
             this.playbackStateBuilder = new PlaybackStateCompat.Builder()
                     .setActions(
                             PlaybackStateCompat.ACTION_PLAY |
@@ -105,6 +102,7 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
         }
         return playbackStateBuilder;
     }
+
     public void initialiseMediaSession(Context context, String activityNameTag, SimpleExoPlayer exoPlayer) {
         getMediaSession(context, activityNameTag);
         mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
@@ -131,10 +129,10 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
 
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-        if(playbackState == ExoPlayer.STATE_READY && playWhenReady) {
+        if (playbackState == ExoPlayer.STATE_READY && playWhenReady) {
             getStateBuilder().setState(PlaybackStateCompat.STATE_PLAYING,
                     getExoPlayer().getCurrentPosition(), 1f);
-        } else if(playbackState == ExoPlayer.STATE_READY) {
+        } else if (playbackState == ExoPlayer.STATE_READY) {
             getStateBuilder().setState(PlaybackStateCompat.STATE_PAUSED,
                     getExoPlayer().getCurrentPosition(), 1f);
         }
@@ -153,9 +151,11 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
 
     private class MySessionCallback extends MediaSessionCompat.Callback {
         private SimpleExoPlayer exoPlayer;
+
         public MySessionCallback(SimpleExoPlayer exoPlayer) {
             this.exoPlayer = exoPlayer;
         }
+
         @Override
         public void onPlay() {
             exoPlayer.setPlayWhenReady(true);
