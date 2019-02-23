@@ -12,5 +12,6 @@
     <dimen name="padding_normal">16dp</dimen>
     <dimen name="padding_large">32dp</dimen>
     <dimen name="line_spacing">6dp</dimen>
+    <dimen name="navigation_button_size">40dp</dimen>
     <integer name="recipe_list_columns">1</integer>
 </resources>

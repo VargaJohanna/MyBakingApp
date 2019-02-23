@@ -33,29 +33,20 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/playerView" />
 
-        <Button
+        <ImageButton
             android:id="@+id/previous_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            android:text="@string/previous_button_text"
+            style="@style/ButtonStyle"
             android:visibility="invisible"
+            android:background="@drawable/ic_angle_left_font"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/next_button"
             app:layout_constraintStart_toStartOf="parent" />
 
-        <Button
+        <ImageButton
             android:id="@+id/next_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
-            android:text="@string/next_button_text"
+            style="@style/ButtonStyle"
             android:visibility="invisible"
-            android:background="@color/primary_light"
-            android:textColor="@color/secondary_text"
+            android:background="@drawable/ic_angle_right_font_"
             app:layout_constraintStart_toEndOf="@+id/previous_button"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
