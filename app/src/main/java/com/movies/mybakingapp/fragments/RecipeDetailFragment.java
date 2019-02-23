@@ -15,7 +15,7 @@ import com.movies.mybakingapp.R;
 import com.movies.mybakingapp.activities.RecipeInstructionsActivity;
 import com.movies.mybakingapp.adapters.IngredientsAdapter;
 import com.movies.mybakingapp.adapters.StepsAdapter;
-import com.movies.mybakingapp.modal.Steps;
+import com.movies.mybakingapp.modal.Step;
 import com.movies.mybakingapp.viewmodels.RecipeDetailViewModel;
 
 public class RecipeDetailFragment extends Fragment implements StepsAdapter.ItemClickListenerSteps {
@@ -37,10 +37,10 @@ public class RecipeDetailFragment extends Fragment implements StepsAdapter.ItemC
         ingredientsRecyclerView.setLayoutManager(ingredientsLayout);
         ingredientsRecyclerView.setAdapter(ingredientsAdapter);
 
-        //Steps
+        //Step
         RecyclerView.LayoutManager stepLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         RecyclerView stepsRecyclerView = rootView.findViewById(R.id.steps_recycler_view);
-        StepsAdapter stepsAdapter = new StepsAdapter(detailViewModel.getCurrentRecipe().getStepsList(), this);
+        StepsAdapter stepsAdapter = new StepsAdapter(detailViewModel.getCurrentRecipe().getStepsList(), this, detailViewModel);
         stepsRecyclerView.setLayoutManager(stepLayoutManager);
         stepsRecyclerView.setAdapter(stepsAdapter);
 
@@ -48,7 +48,7 @@ public class RecipeDetailFragment extends Fragment implements StepsAdapter.ItemC
     }
 
     @Override
-    public void onItemClick(Steps step) {
+    public void onItemClick(Step step) {
         RecipeInstructionsActivity.isStepClicked = true;
         detailViewModel.setCurrentStep(step);
     }

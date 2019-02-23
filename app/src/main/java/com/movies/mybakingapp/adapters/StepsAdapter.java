@@ -10,18 +10,20 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.movies.mybakingapp.R;
-import com.movies.mybakingapp.modal.Steps;
+import com.movies.mybakingapp.modal.Step;
+import com.movies.mybakingapp.viewmodels.RecipeDetailViewModel;
 
 import java.util.List;
 
 public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapterViewHolder> {
-    List<Steps> stepsList;
+    List<Step> stepsList;
     final private ItemClickListenerSteps itemClickListenerSteps;
-    private int selectedPosition = RecyclerView.NO_POSITION;
+    private RecipeDetailViewModel viewModel;
 
-    public StepsAdapter(List<Steps> stepsList, ItemClickListenerSteps itemClickListenerSteps) {
+    public StepsAdapter(List<Step> stepsList, ItemClickListenerSteps itemClickListenerSteps, RecipeDetailViewModel viewModel) {
         this.stepsList = stepsList;
         this.itemClickListenerSteps = itemClickListenerSteps;
+        this.viewModel = viewModel;
     }
 
     @NonNull
@@ -33,12 +35,14 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapter
     }
 
     @Override
-    public void onBindViewHolder(@NonNull StepsAdapter.StepsAdapterViewHolder viewHolder, int i) {
-        viewHolder.stepShortDescription.setText(stepsList.get(i).getShortDescription());
-        viewHolder.stepShortDescription.setSelected(selectedPosition == i);
-        if(selectedPosition == i) {
+    public void onBindViewHolder(@NonNull StepsAdapter.StepsAdapterViewHolder viewHolder, int position) {
+        viewHolder.stepShortDescription.setText(stepsList.get(position).getShortDescription());
+        viewHolder.stepShortDescription.setSelected(viewModel.getSelectedStepPosition() == position);
+        if (viewModel.getSelectedStepPosition() == position) {
+            // Set background and text colour of the selected item
             viewHolder.itemView.setBackgroundColor(ContextCompat.getColor(viewHolder.stepShortDescription.getContext(), R.color.colorAccent));
             viewHolder.stepShortDescription.setTextColor(ContextCompat.getColor(viewHolder.stepShortDescription.getContext(), R.color.primary_text));
+            // Reset the colour of the first item
         } else {
             viewHolder.itemView.setBackgroundColor(Color.WHITE);
             viewHolder.stepShortDescription.setTextColor(ContextCompat.getColor(viewHolder.stepShortDescription.getContext(), R.color.secondary_text));
@@ -61,15 +65,14 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapter
 
         @Override
         public void onClick(View view) {
-            notifyItemChanged(selectedPosition);
-            selectedPosition = getLayoutPosition();
-            notifyItemChanged(selectedPosition);
+            notifyItemChanged(viewModel.getSelectedStepPosition());
+            viewModel.setSelectedStepPosition(getLayoutPosition());
+            notifyItemChanged(viewModel.getSelectedStepPosition());
             itemClickListenerSteps.onItemClick(stepsList.get(getAdapterPosition()));
-
         }
     }
 
     public interface ItemClickListenerSteps {
-        void onItemClick(Steps step);
+        void onItemClick(Step step);
     }
 }

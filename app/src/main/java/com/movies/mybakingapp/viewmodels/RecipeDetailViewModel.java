@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v7.widget.RecyclerView;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -29,25 +30,26 @@ import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
 import com.movies.mybakingapp.fragments.StepDetailFragment;
 import com.movies.mybakingapp.modal.Recipe;
-import com.movies.mybakingapp.modal.Steps;
+import com.movies.mybakingapp.modal.Step;
 
 public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer.EventListener {
-    private MutableLiveData<Steps> currentStep;
+    private MutableLiveData<Step> currentStep;
     private Recipe currentRecipe;
     private MediaSessionCompat mediaSession;
     private SimpleExoPlayer exoPlayer;
     private PlaybackStateCompat.Builder playbackStateBuilder;
+    private int selectedStepPosition = RecyclerView.NO_POSITION;
 
     public RecipeDetailViewModel(@NonNull Application application) {
         super(application);
         this.currentStep = new MutableLiveData<>();
     }
 
-    public LiveData<Steps> getCurrentStep() {
+    public LiveData<Step> getCurrentStep() {
         return currentStep;
     }
 
-    public void setCurrentStep(Steps currentStep) {
+    public void setCurrentStep(Step currentStep) {
         this.currentStep.setValue(currentStep);
     }
 
@@ -177,4 +179,17 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
         exoPlayer.release();
         exoPlayer = null;
     }
+
+    public Step getFirstStep() {
+        return getCurrentRecipe().getStepsList().get(0);
+    }
+
+    public int getSelectedStepPosition() {
+        return selectedStepPosition;
+    }
+
+    public void setSelectedStepPosition(int selectedStepPosition) {
+        this.selectedStepPosition = selectedStepPosition;
+    }
+
 }

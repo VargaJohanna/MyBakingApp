@@ -1,7 +1,6 @@
 package com.movies.mybakingapp.fragments;
 
 import android.arch.lifecycle.ViewModelProviders;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,18 +15,18 @@ import android.widget.TextView;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.movies.mybakingapp.R;
 import com.movies.mybakingapp.activities.RecipeInstructionsActivity;
-import com.movies.mybakingapp.modal.Steps;
+import com.movies.mybakingapp.modal.Step;
 import com.movies.mybakingapp.viewmodels.RecipeDetailViewModel;
 
 public class StepDetailFragment extends Fragment {
     public static final String MEDIA_SESSION_TAG = StepDetailFragment.class.getSimpleName();
     private RecipeDetailViewModel viewModel;
 
-    public void setStep(Steps step) {
+    public void setStep(Step step) {
         this.step = step;
     }
 
-    private Steps step;
+    private Step step;
 
     public StepDetailFragment() {
     }

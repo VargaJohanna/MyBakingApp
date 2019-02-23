@@ -8,13 +8,13 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.movies.mybakingapp.R;
+import com.movies.mybakingapp.adapters.StepsAdapter;
 import com.movies.mybakingapp.fragments.RecipeDetailFragment;
 import com.movies.mybakingapp.fragments.StepDetailFragment;
 import com.movies.mybakingapp.modal.Recipe;
-import com.movies.mybakingapp.modal.Steps;
+import com.movies.mybakingapp.modal.Step;
 import com.movies.mybakingapp.viewmodels.RecipeDetailViewModel;
 
 public class RecipeInstructionsActivity extends AppCompatActivity {
@@ -24,11 +24,10 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
     public static final String RECIPE_FRAGMENT = "RecipeDetailFragment";
     public static final String STEP_FRAGMENT = "StepDetailFragment";
     public static final String FROM_STEP_TAG = "FromStep";
-    private Intent intent;
-    private Recipe recipe;
     private RecipeDetailViewModel detailViewModel;
     private FragmentManager fragmentManager;
     private RecipeDetailFragment recipeFragment;
+    private StepDetailFragment stepDetailFragment;
     private boolean twoPane;
     public static boolean isStepClicked;
 
@@ -37,34 +36,44 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_detail);
-        intent = getIntent();
+        Intent intent = getIntent();
         detailViewModel = ViewModelProviders.of(this).get(RecipeDetailViewModel.class);
         fragmentManager = getSupportFragmentManager();
         isStepClicked = false;
         twoPane = false;
         if (intent.hasExtra(RECIPE_OBJECT_FLAG)) {
-            recipe = intent.getParcelableExtra(RECIPE_OBJECT_FLAG);
+            Recipe recipe = intent.getParcelableExtra(RECIPE_OBJECT_FLAG);
             detailViewModel.setCurrentRecipe(recipe);
         }
         if (findViewById(R.id.step_detail_fragment_framelayout) != null) {
             twoPane = true;
         }
         if (savedInstanceState == null) {
+            stepDetailFragment = new StepDetailFragment();
             recipeFragment = new RecipeDetailFragment();
             fragmentManager.beginTransaction()
                     .add(R.id.recipe_detail_fragment_framelayout, recipeFragment, RECIPE_FRAGMENT)
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
+
+            if(twoPane) {
+                stepDetailFragment.setStep(detailViewModel.getFirstStep());
+                detailViewModel.setSelectedStepPosition(0);
+                fragmentManager.beginTransaction()
+                        .replace(R.id.step_detail_fragment_framelayout, stepDetailFragment, STEP_FRAGMENT)
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                        .commit();
+            }
         }
         observeActiveStep();
         setTitle(detailViewModel.getCurrentRecipe().getName());
     }
 
     private void observeActiveStep() {
-        detailViewModel.getCurrentStep().observe(this, new Observer<Steps>() {
+        detailViewModel.getCurrentStep().observe(this, new Observer<Step>() {
             @Override
-            public void onChanged(@Nullable Steps step) {
-                StepDetailFragment stepDetailFragment = new StepDetailFragment();
+            public void onChanged(@Nullable Step step) {
+                stepDetailFragment = new StepDetailFragment();
                 stepDetailFragment.setStep(step);
                 if (twoPane) {
                     fragmentManager.beginTransaction()
