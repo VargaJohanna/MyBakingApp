@@ -7,6 +7,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.widget.RecyclerView;
@@ -39,6 +40,10 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
     private SimpleExoPlayer exoPlayer;
     private PlaybackStateCompat.Builder playbackStateBuilder;
     private int selectedStepPosition = RecyclerView.NO_POSITION;
+    private FragmentManager fragmentManager;
+    private Step savedStep;
+    private boolean twoPane;
+
 
     public RecipeDetailViewModel(@NonNull Application application) {
         super(application);
@@ -174,10 +179,12 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
         }
     }
 
-    public void releasePlayer(SimpleExoPlayer exoPlayer) {
-        exoPlayer.stop();
-        exoPlayer.release();
-        exoPlayer = null;
+    public void releasePlayer() {
+        if(this.exoPlayer != null) {
+            this.exoPlayer.stop();
+            this.exoPlayer.release();
+            this.exoPlayer = null;
+        }
     }
 
     public Step getFirstStep() {
@@ -191,5 +198,32 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
     public void setSelectedStepPosition(int selectedStepPosition) {
         this.selectedStepPosition = selectedStepPosition;
     }
+
+    public FragmentManager getFragmentManager() {
+        return fragmentManager;
+    }
+
+    public void setFragmentManager(FragmentManager fragmentManager) {
+        this.fragmentManager = fragmentManager;
+    }
+
+    // Step that the fragment can always access.
+    public Step getSavedStep() {
+        return savedStep;
+    }
+
+    public void setSavedStep(Step savedStep) {
+        this.savedStep = savedStep;
+    }
+
+    // Share the information about two pane view with the fragments
+    public boolean isTwoPane() {
+        return twoPane;
+    }
+
+    public void setTwoPane(boolean twoPane) {
+        this.twoPane = twoPane;
+    }
+
 
 }
