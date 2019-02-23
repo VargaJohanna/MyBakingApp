@@ -8,4 +8,6 @@
     <string name="method_title">How to make it:</string>
     <string name="example_short_description">Prep the cookie crust.</string>
     <string name="_1">1</string>
+    <string name="previous_button_text">Previous</string>
+    <string name="next_button_text">Next</string>
 </resources>

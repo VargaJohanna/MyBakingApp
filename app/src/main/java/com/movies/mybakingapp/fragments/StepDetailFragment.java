@@ -4,13 +4,11 @@ import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +17,10 @@ import android.widget.TextView;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.movies.mybakingapp.R;
 import com.movies.mybakingapp.activities.RecipeInstructionsActivity;
+import com.movies.mybakingapp.modal.Step;
 import com.movies.mybakingapp.viewmodels.RecipeDetailViewModel;
+
+import java.util.List;
 
 import static com.movies.mybakingapp.activities.RecipeInstructionsActivity.FROM_STEP_TAG;
 import static com.movies.mybakingapp.activities.RecipeInstructionsActivity.RECIPE_FRAGMENT;
@@ -31,8 +32,6 @@ public class StepDetailFragment extends Fragment {
     private TextView stepDetail;
     private SimpleExoPlayerView simpleExoPlayerView;
     private Dialog fullScreenDialog;
-    private boolean playerFullScreen;
-    private boolean isMediaAvailable = false;
 
     public StepDetailFragment() {
     }
@@ -42,27 +41,31 @@ public class StepDetailFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         detailViewModel = ViewModelProviders.of(getActivity()).get(RecipeDetailViewModel.class);
         detailViewModel.setExoPlayer(getActivity());
-        RecipeInstructionsActivity.isStepClicked = true;
+        detailViewModel.setStepClicked(true);
         initFullScreenDialog();
-
-        // Check if media is available
-        if (!detailViewModel.getSavedStep().getThumbnailURL().isEmpty() || !detailViewModel.getSavedStep().getVideoURL().isEmpty()) isMediaAvailable = true;
-
         final View rootView = inflater.inflate(R.layout.fragment_step_detail, container, false);
+
         stepDetail = rootView.findViewById(R.id.step_full_description);
         simpleExoPlayerView = rootView.findViewById(R.id.playerView);
-        stepDetail.setText(detailViewModel.getSavedStep().getDescription());
-        if(isMediaAvailable) {
+
+        //Text and player could be set in step onChanged().??
+        stepDetail.setText(detailViewModel.getStepLongDescription());
+        if (detailViewModel.isMediaAvailableForStep()) {
             simpleExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.grey_background));
             detailViewModel.initialiseMediaSession(getActivity(), MEDIA_SESSION_TAG, detailViewModel.getExoPlayer());
-            detailViewModel.initialisePlayer(simpleExoPlayerView, getUri(), detailViewModel.getExoPlayer(), getActivity());
+            detailViewModel.initialisePlayer(simpleExoPlayerView, detailViewModel.getUri(), detailViewModel.getExoPlayer(), getActivity());
+        } else {
+            simpleExoPlayerView.setVisibility(View.GONE);
         }
 
-        if(savedInstanceState == null && !detailViewModel.isTwoPane()) {
-            if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        if (savedInstanceState == null && !detailViewModel.isTwoPaneMode()) {
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 openFullScreenDialog();
             }
         }
+        setUpButtonViews(rootView.findViewById(R.id.previous_button),
+                rootView.findViewById(R.id.next_button));
+
         return rootView;
     }
 
@@ -73,25 +76,11 @@ public class StepDetailFragment extends Fragment {
         detailViewModel.getMediaSession(getActivity(), MEDIA_SESSION_TAG).setActive(false);
     }
 
-    private Uri getUri() {
-        String url = "";
-        if(isMediaAvailable) {
-            if(!detailViewModel.getSavedStep().getThumbnailURL().isEmpty()) {
-                url = detailViewModel.getSavedStep().getThumbnailURL();
-            } else if (!detailViewModel.getSavedStep().getVideoURL().isEmpty()) {
-                url = detailViewModel.getSavedStep().getVideoURL();
-            }
-        } else {
-            Log.d("DEBUG", "No media was available in the api");
-        }
-        return Uri.parse(url);
-    }
-
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        if(newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE && !detailViewModel.isTwoPane()) {
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE && !detailViewModel.isTwoPaneMode()) {
             openFullScreenDialog();
         } else {
             closeFullScreenDialog(new StepDetailFragment(), STEP_FRAGMENT);
@@ -107,22 +96,71 @@ public class StepDetailFragment extends Fragment {
     }
 
     private void openFullScreenDialog() {
-        if(isMediaAvailable) {
-            ((ViewGroup)simpleExoPlayerView.getParent()).removeView(simpleExoPlayerView);
+        if (detailViewModel.isMediaAvailableForStep()) {
+            ((ViewGroup) simpleExoPlayerView.getParent()).removeView(simpleExoPlayerView);
             fullScreenDialog.addContentView(simpleExoPlayerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            playerFullScreen = true;
             fullScreenDialog.show();
         }
     }
 
     private void closeFullScreenDialog(Fragment fragment, String fragmentTag) {
-        ((ViewGroup)simpleExoPlayerView.getParent()).removeView(simpleExoPlayerView);
+        ((ViewGroup) simpleExoPlayerView.getParent()).removeView(simpleExoPlayerView);
         fullScreenDialog.dismiss();
+        replaceFragment(fragment, fragmentTag);
+        detailViewModel.releasePlayer();
+    }
+
+    private void replaceFragment(Fragment fragment, String fragmentTag) {
         detailViewModel.getFragmentManager().beginTransaction()
                 .replace(R.id.recipe_detail_fragment_framelayout, fragment, fragmentTag)
                 .addToBackStack(FROM_STEP_TAG)
                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                 .commit();
-        playerFullScreen = false;
+    }
+
+    private void setUpButtonViews(final View preButton, final View nextButton) {
+        final List<Step> stepList = detailViewModel.getCurrentRecipe().getStepsList();
+        setButtonsVisibility(preButton, nextButton, stepList.size());
+        preButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (detailViewModel.getCurrentStepPosition() - 1 > 0) {
+                    detailViewModel.setCurrentStep(stepList.get(detailViewModel.getCurrentStepPosition() - 1));
+                    detailViewModel.setSelectedStepPosition(detailViewModel.getCurrentStepPosition());
+                } else {
+                    detailViewModel.setCurrentStep(stepList.get(0));
+                    detailViewModel.setSelectedStepPosition(0);
+                }
+            }
+        });
+        nextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (detailViewModel.getCurrentStepPosition() + 1 < stepList.size()) {
+                    detailViewModel.setCurrentStep(stepList.get(detailViewModel.getCurrentStepPosition() + 1));
+                    detailViewModel.setSelectedStepPosition(detailViewModel.getCurrentStepPosition());
+                } else {
+                    nextButton.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+    }
+
+    private void setButtonsVisibility(View prevButton, View nextButton, int stepListSize) {
+        if (!detailViewModel.isTwoPaneMode()) {
+            if (detailViewModel.getCurrentStepPosition() != 0 && detailViewModel.getCurrentStepPosition() != stepListSize - 1) {
+                prevButton.setVisibility(View.VISIBLE);
+                nextButton.setVisibility(View.VISIBLE);
+            } else if (detailViewModel.getCurrentStepPosition() == 0) {
+                prevButton.setVisibility(View.INVISIBLE);
+                nextButton.setVisibility(View.VISIBLE);
+            } else if (detailViewModel.getCurrentStepPosition() == stepListSize - 1) {
+                prevButton.setVisibility(View.VISIBLE);
+                nextButton.setVisibility(View.INVISIBLE);
+            }
+        } else {
+            prevButton.setVisibility(View.INVISIBLE);
+            nextButton.setVisibility(View.INVISIBLE);
+        }
     }
 }

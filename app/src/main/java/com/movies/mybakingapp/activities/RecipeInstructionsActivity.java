@@ -3,17 +3,13 @@ package com.movies.mybakingapp.activities;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.movies.mybakingapp.R;
-import com.movies.mybakingapp.adapters.StepsAdapter;
 import com.movies.mybakingapp.fragments.RecipeDetailFragment;
 import com.movies.mybakingapp.fragments.StepDetailFragment;
 import com.movies.mybakingapp.modal.Recipe;
@@ -27,7 +23,6 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
     public static final String STEP_FRAGMENT = "StepDetailFragment";
     public static final String FROM_STEP_TAG = "FromStep";
     private RecipeDetailViewModel detailViewModel;
-    public static boolean isStepClicked;
 
 
     @Override
@@ -37,23 +32,27 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
         Intent intent = getIntent();
         detailViewModel = ViewModelProviders.of(this).get(RecipeDetailViewModel.class);
         detailViewModel.setFragmentManager(getSupportFragmentManager());
-        isStepClicked = false;
-        detailViewModel.setTwoPane(false);
+        detailViewModel.setStepClicked(false);
+        detailViewModel.setTwoPaneMode(false);
         if (intent.hasExtra(RECIPE_OBJECT_FLAG)) {
             Recipe recipe = intent.getParcelableExtra(RECIPE_OBJECT_FLAG);
             detailViewModel.setCurrentRecipe(recipe);
         }
         if (findViewById(R.id.step_detail_fragment_framelayout) != null) {
-            detailViewModel.setTwoPane(true);
+            detailViewModel.setTwoPaneMode(true);
         }
+//        observeActiveStep();
         if (savedInstanceState == null) {
             detailViewModel.getFragmentManager().beginTransaction()
                     .add(R.id.recipe_detail_fragment_framelayout, new RecipeDetailFragment(), RECIPE_FRAGMENT)
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
 
-            if(detailViewModel.isTwoPane()) {
-                detailViewModel.setSavedStep(detailViewModel.getFirstStep());
+            if (detailViewModel.isTwoPaneMode()) {
+                // setCurrentStep() is not triggering the onChanged() in getCurrentStep(), so I set the video urls manually.
+                detailViewModel.setCurrentStep(detailViewModel.getFirstStep());
+                detailViewModel.setThumbnailURL(detailViewModel.getFirstStep().getThumbnailURL());
+                detailViewModel.setVideoURL(detailViewModel.getFirstStep().getVideoURL());
                 detailViewModel.setSelectedStepPosition(0);
                 detailViewModel.getFragmentManager().beginTransaction()
                         .replace(R.id.step_detail_fragment_framelayout, new StepDetailFragment(), STEP_FRAGMENT)
@@ -69,13 +68,17 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
         detailViewModel.getCurrentStep().observe(this, new Observer<Step>() {
             @Override
             public void onChanged(@Nullable Step step) {
-                detailViewModel.setSavedStep(step);
-                if (detailViewModel.isTwoPane()) {
+                detailViewModel.setVideoURL(step.getVideoURL());
+                detailViewModel.setThumbnailURL(step.getThumbnailURL());
+                detailViewModel.setStepLongDescription(step.getDescription());
+                detailViewModel.setCurrentStepPosition(step.getId());
+
+                if (detailViewModel.isTwoPaneMode()) {
                     detailViewModel.getFragmentManager().beginTransaction()
                             .replace(R.id.step_detail_fragment_framelayout, new StepDetailFragment(), STEP_FRAGMENT)
                             .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                             .commit();
-                } else if (!detailViewModel.isTwoPane() && isStepClicked){
+                } else if (!detailViewModel.isTwoPaneMode() && detailViewModel.isStepClicked()) {
                     detailViewModel.getFragmentManager().beginTransaction()
                             .replace(R.id.recipe_detail_fragment_framelayout, new StepDetailFragment(), STEP_FRAGMENT)
                             .addToBackStack(FROM_STEP_TAG)
@@ -88,7 +91,7 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (!detailViewModel.isTwoPane()) {
+        if (!detailViewModel.isTwoPaneMode()) {
             if (getSupportFragmentManager().findFragmentByTag(STEP_FRAGMENT) != null) {
                 getSupportFragmentManager().popBackStack(FROM_STEP_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             } else {

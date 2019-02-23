@@ -35,21 +35,25 @@ import com.movies.mybakingapp.modal.Step;
 
 public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer.EventListener {
     private MutableLiveData<Step> currentStep;
+    private int currentStepPosition;
     private Recipe currentRecipe;
     private MediaSessionCompat mediaSession;
     private SimpleExoPlayer exoPlayer;
     private PlaybackStateCompat.Builder playbackStateBuilder;
     private int selectedStepPosition = RecyclerView.NO_POSITION;
     private FragmentManager fragmentManager;
-    private Step savedStep;
-    private boolean twoPane;
-
+    private boolean twoPaneMode;
+    private String StepLongDescription;
+    private String videoURL;
+    private String thumbnailURL;
+    private boolean isStepClicked;
 
     public RecipeDetailViewModel(@NonNull Application application) {
         super(application);
         this.currentStep = new MutableLiveData<>();
     }
 
+    // Step Data
     public LiveData<Step> getCurrentStep() {
         return currentStep;
     }
@@ -58,6 +62,35 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
         this.currentStep.setValue(currentStep);
     }
 
+    public int getCurrentStepPosition() {
+        return currentStepPosition;
+    }
+
+    public void setCurrentStepPosition(int currentStepPosition) {
+        this.currentStepPosition = currentStepPosition;
+    }
+
+    public Step getFirstStep() {
+        return getCurrentRecipe().getStepsList().get(0);
+    }
+
+    public int getSelectedStepPosition() {
+        return selectedStepPosition;
+    }
+
+    public void setSelectedStepPosition(int selectedStepPosition) {
+        this.selectedStepPosition = selectedStepPosition;
+    }
+
+    public boolean isStepClicked() {
+        return isStepClicked;
+    }
+
+    public void setStepClicked(boolean stepClicked) {
+        isStepClicked = stepClicked;
+    }
+
+    // Recipe Data
     public Recipe getCurrentRecipe() {
         return currentRecipe;
     }
@@ -66,6 +99,26 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
         this.currentRecipe = currentRecipe;
     }
 
+    // Fragment Manager
+    public FragmentManager getFragmentManager() {
+        return fragmentManager;
+    }
+
+    public void setFragmentManager(FragmentManager fragmentManager) {
+        this.fragmentManager = fragmentManager;
+    }
+
+    // Share the information about two pane view with the fragments
+    public boolean isTwoPaneMode() {
+        return twoPaneMode;
+    }
+
+    public void setTwoPaneMode(boolean twoPaneMode) {
+        this.twoPaneMode = twoPaneMode;
+    }
+
+
+    //Exoplayer methods
     public void setExoPlayer(Context context) {
         if (exoPlayer == null) {
             TrackSelector trackSelector = new DefaultTrackSelector();
@@ -180,50 +233,50 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
     }
 
     public void releasePlayer() {
-        if(this.exoPlayer != null) {
+        if (this.exoPlayer != null) {
             this.exoPlayer.stop();
             this.exoPlayer.release();
             this.exoPlayer = null;
         }
     }
 
-    public Step getFirstStep() {
-        return getCurrentRecipe().getStepsList().get(0);
+    // Data from current step
+    public String getStepLongDescription() {
+        return StepLongDescription;
     }
 
-    public int getSelectedStepPosition() {
-        return selectedStepPosition;
+    public void setStepLongDescription(String stepLongDescription) {
+        StepLongDescription = stepLongDescription;
     }
 
-    public void setSelectedStepPosition(int selectedStepPosition) {
-        this.selectedStepPosition = selectedStepPosition;
+    public String getVideoURL() {
+        return videoURL;
     }
 
-    public FragmentManager getFragmentManager() {
-        return fragmentManager;
+    public void setVideoURL(String videoURL) {
+        this.videoURL = videoURL;
     }
 
-    public void setFragmentManager(FragmentManager fragmentManager) {
-        this.fragmentManager = fragmentManager;
+    public String getThumbnailURL() {
+        return thumbnailURL;
     }
 
-    // Step that the fragment can always access.
-    public Step getSavedStep() {
-        return savedStep;
+    public void setThumbnailURL(String thumbnailURL) {
+        this.thumbnailURL = thumbnailURL;
     }
 
-    public void setSavedStep(Step savedStep) {
-        this.savedStep = savedStep;
+    public boolean isMediaAvailableForStep() {
+        return !getThumbnailURL().isEmpty() || !getVideoURL().isEmpty();
     }
 
-    // Share the information about two pane view with the fragments
-    public boolean isTwoPane() {
-        return twoPane;
+    public Uri getUri() {
+        if (isMediaAvailableForStep()) {
+            if (!getThumbnailURL().isEmpty()) {
+                return Uri.parse(getThumbnailURL());
+            } else if (!getVideoURL().isEmpty()) {
+                return Uri.parse(getVideoURL());
+            }
+        }
+        return null;
     }
-
-    public void setTwoPane(boolean twoPane) {
-        this.twoPane = twoPane;
-    }
-
-
 }

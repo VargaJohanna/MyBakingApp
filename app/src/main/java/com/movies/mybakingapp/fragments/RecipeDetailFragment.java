@@ -49,7 +49,7 @@ public class RecipeDetailFragment extends Fragment implements StepsAdapter.ItemC
 
     @Override
     public void onItemClick(Step step) {
-        RecipeInstructionsActivity.isStepClicked = true;
+        detailViewModel.setStepClicked(true);
         detailViewModel.setCurrentStep(step);
     }
 }
