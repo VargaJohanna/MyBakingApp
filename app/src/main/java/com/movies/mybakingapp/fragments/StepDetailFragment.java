@@ -69,11 +69,11 @@ public class StepDetailFragment extends Fragment {
 
     private Uri getUri() {
         String url = "";
-        if(step.getVideoURL() == null && step.getThumbnailURL() != null) {
+        if(step.getVideoURL().isEmpty() && !step.getThumbnailURL().isEmpty()) {
             url = step.getThumbnailURL();
-        } else if (step.getVideoURL() != null && step.getThumbnailURL() == null) {
+        } else if (!step.getVideoURL().isEmpty() && step.getThumbnailURL().isEmpty()) {
             url = step.getVideoURL();
-        } else if(step.getVideoURL() != null && step.getThumbnailURL() != null) {
+        } else if(!step.getVideoURL().isEmpty() && !step.getThumbnailURL().isEmpty()) {
             url = step.getVideoURL();
         }
         return Uri.parse(url);

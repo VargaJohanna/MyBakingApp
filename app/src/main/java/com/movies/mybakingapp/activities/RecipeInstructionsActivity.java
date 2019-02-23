@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -52,6 +53,7 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
             recipeFragment = new RecipeDetailFragment();
             fragmentManager.beginTransaction()
                     .add(R.id.recipe_detail_fragment_framelayout, recipeFragment, RECIPE_FRAGMENT)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                     .commit();
         }
         observeActiveStep();
@@ -67,11 +69,13 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
                 if (twoPane) {
                     fragmentManager.beginTransaction()
                             .replace(R.id.step_detail_fragment_framelayout, stepDetailFragment, STEP_FRAGMENT)
+                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                             .commit();
                 } else if (!twoPane && isStepClicked){
                     fragmentManager.beginTransaction()
                             .replace(R.id.recipe_detail_fragment_framelayout, stepDetailFragment, STEP_FRAGMENT)
                             .addToBackStack(FROM_STEP_TAG)
+                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                             .commit();
                 }
             }

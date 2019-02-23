@@ -2,4 +2,5 @@
 <resources>
     <integer name="recipe_list_columns">2</integer>
     <dimen name="text_size_normal">16sp</dimen>
+    <dimen name="text_size_large">24sp</dimen>
 </resources>
