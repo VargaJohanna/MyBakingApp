@@ -1,12 +1,14 @@
 package com.movies.mybakingapp.activities;
 
+import android.appwidget.AppWidgetManager;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -19,12 +21,13 @@ import com.movies.mybakingapp.modal.Recipe;
 import com.movies.mybakingapp.network.GetRecipesService;
 import com.movies.mybakingapp.network.RetrofitInstance;
 import com.movies.mybakingapp.viewmodels.MainRecipeListViewModel;
-import com.movies.mybakingapp.viewmodels.RecipeDetailViewModel;
+import com.movies.mybakingapp.widgets.RecipeWidgetProvider;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainRecipeListActivity extends AppCompatActivity implements RecipeAdapter.ItemClickListener {
+    public static int recipePosition = 0;
     ActivityMainRecipeListBinding mBinding;
     private MainRecipeListViewModel viewModel;
     private RecipeAdapter mainAdapter;
@@ -54,7 +57,7 @@ public class MainRecipeListActivity extends AppCompatActivity implements RecipeA
         viewModel.getRecipeList().observe(MainRecipeListActivity.this, new Observer<List<Recipe>>() {
             @Override
             public void onChanged(@Nullable List<Recipe> recipeList) {
-                if(!recipeList.isEmpty()) {
+                if (!recipeList.isEmpty()) {
                     mainAdapter.updateList(recipeList);
                 } else {
                     Toast.makeText(MainRecipeListActivity.this, getString(R.string.no_internet_message), Toast.LENGTH_SHORT).show();
@@ -65,9 +68,18 @@ public class MainRecipeListActivity extends AppCompatActivity implements RecipeA
     }
 
     @Override
-    public void onItemClick(Recipe recipe) {
+    public void onItemClick(Recipe recipe, int recipePosition) {
+        MainRecipeListActivity.recipePosition = recipePosition;
+        notifyWidget();
         Intent recipeDetailActivity = new Intent(this, RecipeInstructionsActivity.class);
         recipeDetailActivity.putExtra(RecipeInstructionsActivity.RECIPE_OBJECT_FLAG, recipe);
         startActivity(recipeDetailActivity);
+    }
+
+    private void notifyWidget() {
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
+        int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this, RecipeWidgetProvider.class));
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_ingredient_list);
+
     }
 }

@@ -41,7 +41,6 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
         if (findViewById(R.id.step_detail_fragment_framelayout) != null) {
             detailViewModel.setTwoPaneMode(true);
         }
-//        observeActiveStep();
         if (savedInstanceState == null) {
             detailViewModel.getFragmentManager().beginTransaction()
                     .add(R.id.recipe_detail_fragment_framelayout, new RecipeDetailFragment(), RECIPE_FRAGMENT)
@@ -49,7 +48,6 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
                     .commit();
 
             if (detailViewModel.isTwoPaneMode()) {
-                // setCurrentStep() is not triggering the onChanged() in getCurrentStep(), so I set the video urls manually.
                 detailViewModel.setCurrentStep(detailViewModel.getFirstStep());
                 detailViewModel.setThumbnailURL(detailViewModel.getFirstStep().getThumbnailURL());
                 detailViewModel.setVideoURL(detailViewModel.getFirstStep().getVideoURL());

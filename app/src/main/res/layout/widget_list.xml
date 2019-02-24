@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/primary_light"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/widget_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="@dimen/navigation_button_size"
+            android:layout_height="@dimen/navigation_button_size"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:layout_marginBottom="@dimen/margin_normal"
+            android:background="@drawable/cupcake" />
+
+
+        <ImageButton
+            android:id="@+id/widget_button"
+            android:layout_width="@dimen/navigation_button_size"
+            android:layout_height="@dimen/navigation_button_size"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:layout_marginBottom="@dimen/margin_normal"
+            android:background="@drawable/ic_angle_right_font" />
+    </RelativeLayout>
+
+
+    <ListView
+        android:id="@+id/widget_ingredient_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/empty_view"
+        android:text="@string/empty_widget_text"
+        android:textColor="@color/primary_text"
+        android:textSize="@dimen/text_size_normal"
+        android:textStyle="bold"
+        android:layout_margin="@dimen/margin_normal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</LinearLayout>

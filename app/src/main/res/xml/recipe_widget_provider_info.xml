@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:initialKeyguardLayout="@layout/ingredients_widget"
+    android:initialLayout="@layout/ingredients_widget"
+    android:minWidth="150dp"
+    android:minHeight="200dp"
+    android:previewImage="@drawable/cupcake"
+    android:resizeMode="horizontal|vertical"
+    android:updatePeriodMillis="2000"
+    android:widgetCategory="home_screen" />

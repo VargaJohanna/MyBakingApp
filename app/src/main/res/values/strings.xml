@@ -5,9 +5,14 @@
     <string name="example_measure">TSP</string>
     <string name="ingredient">vanilla</string>
     <string name="ingredients_title">Ingredients:</string>
+    <string name="ingredients_widget_title">Ingredients for</string>
     <string name="method_title">How to make it:</string>
     <string name="example_short_description">Prep the cookie crust.</string>
     <string name="_1">1</string>
     <string name="previous_button_text">Previous</string>
     <string name="next_button_text">Next</string>
+    <string name="add_widget">Add widget</string>
+    <string name="example_widget_ingredient">vanilla</string>
+    <string name="example_recipe_name">Nutella Pie</string>
+    <string name="empty_widget_text">Check out the best recipes</string>
 </resources>

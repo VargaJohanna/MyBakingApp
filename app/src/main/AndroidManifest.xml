@@ -8,9 +8,9 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/cupcake_2388217_960_720"
+        android:icon="@drawable/cupcake"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/cupcake_2388217_960_720"
+        android:roundIcon="@drawable/cupcake"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
@@ -21,8 +21,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.RecipeInstructionsActivity"
-            android:configChanges="orientation"/>
+        <activity
+            android:name=".activities.RecipeInstructionsActivity"
+            android:configChanges="orientation" />
+
+        <receiver android:name=".widgets.RecipeWidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/recipe_widget_provider_info" />
+        </receiver>
+
+        <service
+            android:name=".widgets.ListWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
     </application>
 
 </manifest>

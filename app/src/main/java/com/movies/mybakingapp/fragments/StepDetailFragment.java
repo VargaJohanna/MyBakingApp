@@ -77,6 +77,18 @@ public class StepDetailFragment extends Fragment {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        detailViewModel.releasePlayer();
+        detailViewModel.getMediaSession(getActivity(), MEDIA_SESSION_TAG).setActive(false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
@@ -124,6 +136,8 @@ public class StepDetailFragment extends Fragment {
         preButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                detailViewModel.releasePlayer();
+                detailViewModel.getMediaSession(getActivity(), MEDIA_SESSION_TAG).setActive(false);
                 if (detailViewModel.getCurrentStepPosition() - 1 > 0) {
                     detailViewModel.setCurrentStep(stepList.get(detailViewModel.getCurrentStepPosition() - 1));
                     detailViewModel.setSelectedStepPosition(detailViewModel.getCurrentStepPosition());
@@ -136,6 +150,8 @@ public class StepDetailFragment extends Fragment {
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                detailViewModel.releasePlayer();
+                detailViewModel.getMediaSession(getActivity(), MEDIA_SESSION_TAG).setActive(false);
                 if (detailViewModel.getCurrentStepPosition() + 1 < stepList.size()) {
                     detailViewModel.setCurrentStep(stepList.get(detailViewModel.getCurrentStepPosition() + 1));
                     detailViewModel.setSelectedStepPosition(detailViewModel.getCurrentStepPosition());
