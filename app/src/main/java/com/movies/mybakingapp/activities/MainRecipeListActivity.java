@@ -60,7 +60,8 @@ public class MainRecipeListActivity extends AppCompatActivity implements RecipeA
                 if (!recipeList.isEmpty()) {
                     mainAdapter.updateList(recipeList);
                 } else {
-                    Toast.makeText(MainRecipeListActivity.this, getString(R.string.no_internet_message), Toast.LENGTH_SHORT).show();
+                    mBinding.noRecipeMessage.setVisibility(View.VISIBLE);
+                    Toast.makeText(MainRecipeListActivity.this, getString(R.string.no_network_message), Toast.LENGTH_SHORT).show();
                 }
                 mBinding.progressBarRecipeList.setVisibility(View.INVISIBLE);
             }

@@ -2,8 +2,11 @@ package com.movies.mybakingapp.fragments;
 
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,11 +16,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.movies.mybakingapp.R;
 import com.movies.mybakingapp.activities.RecipeInstructionsActivity;
 import com.movies.mybakingapp.modal.Step;
+import com.movies.mybakingapp.utilities.ConnectionUtils;
 import com.movies.mybakingapp.viewmodels.RecipeDetailViewModel;
 
 import java.util.List;
@@ -48,16 +53,20 @@ public class StepDetailFragment extends Fragment {
         stepDetail = rootView.findViewById(R.id.step_full_description);
         simpleExoPlayerView = rootView.findViewById(R.id.playerView);
 
-        //Text and player could be set in step onChanged().??
         stepDetail.setText(detailViewModel.getStepLongDescription());
-        if (detailViewModel.isMediaAvailableForStep()) {
-            simpleExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.grey_background));
-            detailViewModel.initialiseMediaSession(getActivity(), MEDIA_SESSION_TAG, detailViewModel.getExoPlayer());
-            detailViewModel.initialisePlayer(simpleExoPlayerView, detailViewModel.getUri(), detailViewModel.getExoPlayer(), getActivity());
+        // Show player only if there's available network
+        if(ConnectionUtils.isNetworkAvailable(getActivity())) {
+            if (detailViewModel.isMediaAvailableForStep()) {
+                simpleExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.grey_background));
+                detailViewModel.initialiseMediaSession(getActivity(), MEDIA_SESSION_TAG, detailViewModel.getExoPlayer());
+                detailViewModel.initialisePlayer(simpleExoPlayerView, detailViewModel.getUri(), detailViewModel.getExoPlayer(), getActivity());
+            } else {
+                simpleExoPlayerView.setVisibility(View.GONE);
+            }
         } else {
             simpleExoPlayerView.setVisibility(View.GONE);
+            Toast.makeText(getActivity(), getString(R.string.no_network_message), Toast.LENGTH_SHORT).show();
         }
-
         if (savedInstanceState == null && !detailViewModel.isTwoPaneMode()) {
             if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 openFullScreenDialog();

@@ -8,12 +8,14 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
 
 import com.movies.mybakingapp.R;
 import com.movies.mybakingapp.fragments.RecipeDetailFragment;
 import com.movies.mybakingapp.fragments.StepDetailFragment;
 import com.movies.mybakingapp.modal.Recipe;
 import com.movies.mybakingapp.modal.Step;
+import com.movies.mybakingapp.utilities.ConnectionUtils;
 import com.movies.mybakingapp.viewmodels.RecipeDetailViewModel;
 
 public class RecipeInstructionsActivity extends AppCompatActivity {
@@ -28,38 +30,43 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recipe_detail);
-        Intent intent = getIntent();
-        detailViewModel = ViewModelProviders.of(this).get(RecipeDetailViewModel.class);
-        detailViewModel.setFragmentManager(getSupportFragmentManager());
-        detailViewModel.setStepClicked(false);
-        detailViewModel.setTwoPaneMode(false);
-        if (intent.hasExtra(RECIPE_OBJECT_FLAG)) {
-            Recipe recipe = intent.getParcelableExtra(RECIPE_OBJECT_FLAG);
-            detailViewModel.setCurrentRecipe(recipe);
-        }
-        if (findViewById(R.id.step_detail_fragment_framelayout) != null) {
-            detailViewModel.setTwoPaneMode(true);
-        }
-        if (savedInstanceState == null) {
-            detailViewModel.getFragmentManager().beginTransaction()
-                    .add(R.id.recipe_detail_fragment_framelayout, new RecipeDetailFragment(), RECIPE_FRAGMENT)
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                    .commit();
 
-            if (detailViewModel.isTwoPaneMode()) {
-                detailViewModel.setCurrentStep(detailViewModel.getFirstStep());
-                detailViewModel.setThumbnailURL(detailViewModel.getFirstStep().getThumbnailURL());
-                detailViewModel.setVideoURL(detailViewModel.getFirstStep().getVideoURL());
-                detailViewModel.setSelectedStepPosition(0);
+        if(ConnectionUtils.isNetworkAvailable(this)) {
+            setContentView(R.layout.activity_recipe_detail);
+            Intent intent = getIntent();
+            detailViewModel = ViewModelProviders.of(this).get(RecipeDetailViewModel.class);
+            detailViewModel.setFragmentManager(getSupportFragmentManager());
+            detailViewModel.setStepClicked(false);
+            detailViewModel.setTwoPaneMode(false);
+            if (intent.hasExtra(RECIPE_OBJECT_FLAG)) {
+                Recipe recipe = intent.getParcelableExtra(RECIPE_OBJECT_FLAG);
+                detailViewModel.setCurrentRecipe(recipe);
+            }
+            if (findViewById(R.id.step_detail_fragment_framelayout) != null) {
+                detailViewModel.setTwoPaneMode(true);
+            }
+            if (savedInstanceState == null) {
                 detailViewModel.getFragmentManager().beginTransaction()
-                        .replace(R.id.step_detail_fragment_framelayout, new StepDetailFragment(), STEP_FRAGMENT)
+                        .add(R.id.recipe_detail_fragment_framelayout, new RecipeDetailFragment(), RECIPE_FRAGMENT)
                         .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
                         .commit();
+
+                if (detailViewModel.isTwoPaneMode()) {
+                    detailViewModel.setCurrentStep(detailViewModel.getFirstStep());
+                    detailViewModel.setThumbnailURL(detailViewModel.getFirstStep().getThumbnailURL());
+                    detailViewModel.setVideoURL(detailViewModel.getFirstStep().getVideoURL());
+                    detailViewModel.setSelectedStepPosition(0);
+                    detailViewModel.getFragmentManager().beginTransaction()
+                            .replace(R.id.step_detail_fragment_framelayout, new StepDetailFragment(), STEP_FRAGMENT)
+                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                            .commit();
+                }
             }
+            observeActiveStep();
+            setTitle(detailViewModel.getCurrentRecipe().getName());
+        } else {
+            Toast.makeText(this, getString(R.string.no_network_message), Toast.LENGTH_SHORT).show();
         }
-        observeActiveStep();
-        setTitle(detailViewModel.getCurrentRecipe().getName());
     }
 
     private void observeActiveStep() {

@@ -27,5 +27,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <TextView
+            android:id="@+id/no_recipe_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_large"
+            style="@style/TitleTextStyle"
+            android:text="@string/no_recipes_message"
+            android:gravity="left"
+            android:paddingTop="@dimen/padding_normal"
+            android:visibility="invisible"/>
+
     </android.support.constraint.ConstraintLayout>
 </layout>
