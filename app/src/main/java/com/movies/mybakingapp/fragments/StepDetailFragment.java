@@ -2,11 +2,8 @@ package com.movies.mybakingapp.fragments;
 
 import android.app.Dialog;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,9 +15,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.movies.mybakingapp.R;
-import com.movies.mybakingapp.activities.RecipeInstructionsActivity;
 import com.movies.mybakingapp.modal.Step;
 import com.movies.mybakingapp.utilities.ConnectionUtils;
 import com.movies.mybakingapp.viewmodels.RecipeDetailViewModel;
@@ -55,7 +52,7 @@ public class StepDetailFragment extends Fragment {
 
         stepDetail.setText(detailViewModel.getStepLongDescription());
         // Show player only if there's available network
-        if(ConnectionUtils.isNetworkAvailable(getActivity())) {
+        if (ConnectionUtils.isNetworkAvailable(getActivity())) {
             if (detailViewModel.isMediaAvailableForStep()) {
                 simpleExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.grey_background));
                 detailViewModel.initialiseMediaSession(getActivity(), MEDIA_SESSION_TAG, detailViewModel.getExoPlayer());
@@ -88,13 +85,23 @@ public class StepDetailFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        detailViewModel.releasePlayer();
-        detailViewModel.getMediaSession(getActivity(), MEDIA_SESSION_TAG).setActive(false);
+        if (detailViewModel.getExoPlayer() != null) {
+            if (detailViewModel.getExoPlayer().getPlaybackState() == ExoPlayer.STATE_READY) {
+                detailViewModel.getExoPlayer().setPlayWhenReady(false);
+                detailViewModel.getMediaSession(getActivity(), MEDIA_SESSION_TAG).setActive(false);
+            }
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        if (detailViewModel.getExoPlayer() != null) {
+            if (detailViewModel.getExoPlayer().getPlaybackState() == ExoPlayer.STATE_IDLE) {
+                detailViewModel.getExoPlayer().setPlayWhenReady(true);
+                detailViewModel.getMediaSession(getActivity(), MEDIA_SESSION_TAG).setActive(true);
+            }
+        }
     }
 
     @Override
