@@ -16,11 +16,12 @@
             android:layout_height="@dimen/navigation_button_size"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_normal"
             android:layout_marginEnd="@dimen/margin_normal"
             android:layout_marginBottom="@dimen/margin_normal"
-            android:background="@drawable/cupcake" />
+            android:background="@drawable/cupcake"
+            android:contentDescription="@string/widget_logo_description" />
 
 
         <ImageButton
@@ -30,12 +31,12 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
             android:layout_marginStart="@dimen/margin_normal"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/margin_normal"
             android:layout_marginEnd="@dimen/margin_normal"
             android:layout_marginBottom="@dimen/margin_normal"
-            android:background="@drawable/ic_angle_right_font" />
+            android:background="@drawable/ic_angle_right_font"
+            android:contentDescription="@string/widget_button_description" />
     </RelativeLayout>
-
 
     <ListView
         android:id="@+id/widget_ingredient_list"
@@ -44,12 +45,12 @@
 
     <TextView
         android:id="@+id/empty_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_normal"
         android:text="@string/empty_widget_text"
         android:textColor="@color/primary_text"
         android:textSize="@dimen/text_size_normal"
-        android:textStyle="bold"
-        android:layout_margin="@dimen/margin_normal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:textStyle="bold" />
 
 </LinearLayout>

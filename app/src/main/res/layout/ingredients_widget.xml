@@ -1,31 +1,30 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_list_item"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="@dimen/widget_margin"
-    android:id="@+id/widget_list_item">
+    android:padding="@dimen/widget_margin">
 
-        <TextView
-            android:id="@+id/widget_recipe_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:layout_margin="@dimen/margin_normal"
-            android:text="@string/example_recipe_name"
-            android:textColor="@color/primary_text"
-            android:textSize="@dimen/text_size_normal"
-            android:textStyle="bold" />
+    <TextView
+        android:id="@+id/widget_recipe_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="@dimen/margin_normal"
+        android:text="@string/example_recipe_name"
+        android:textColor="@color/primary_text"
+        android:textSize="@dimen/text_size_normal"
+        android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/widget_ingredient_text"
-            style="@style/IngredientsTextStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/widget_recipe_name"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:layout_margin="@dimen/margin_extra_small"
-            android:text="@string/example_widget_ingredient" />
-
+    <TextView
+        android:id="@+id/widget_ingredient_text"
+        style="@style/IngredientsTextStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/widget_recipe_name"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="@dimen/margin_extra_small"
+        android:text="@string/example_widget_ingredient" />
 
 </RelativeLayout>

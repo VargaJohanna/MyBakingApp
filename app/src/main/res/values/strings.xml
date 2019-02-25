@@ -17,4 +17,11 @@
     <string name="no_network_message">Something went wrong. Please check your network connection</string>
     <string name="mobile_data_used_message">Wifi is disconnected. Using mobile data.</string>
     <string name="no_recipes_message">We couldn\'t find any recipes to show for now. Please come back later.</string>
+    <string name="image_of_a_step_description">Image of a step</string>
+    <string name="prev_button_description">Button for navigating to previous step</string>
+    <string name="next_button_description">Button for navigating to the next step</string>
+    <string name="step_icon_description">Arrow pointing right on a step row</string>
+    <string name="dot_icon_description">Dot icon in front of ingredient list item</string>
+    <string name="widget_logo_description">Cupcake logo on widget header</string>
+    <string name="widget_button_description">Right arrow on widget</string>
 </resources>

@@ -13,6 +13,7 @@
     <dimen name="padding_large">32dp</dimen>
     <dimen name="line_spacing">6dp</dimen>
     <dimen name="navigation_button_size">40dp</dimen>
+    <dimen name="card_view_radius">4dp</dimen>
     <integer name="recipe_list_columns">1</integer>
 
     <!--
@@ -20,4 +21,7 @@ Refer to App Widget Documentation for margin information
 http://developer.android.com/guide/topics/appwidgets/index.html#CreatingLayout
     -->
     <dimen name="widget_margin">8dp</dimen>
+    <dimen name="ingredient_dot_sizr">6dp</dimen>
+    <dimen name="line_spacing_normal">6dp</dimen>
+    <dimen name="navigation_button_size_small">30dp</dimen>
 </resources>

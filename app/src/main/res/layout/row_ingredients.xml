@@ -6,11 +6,12 @@
 
     <ImageView
         android:id="@+id/dot_icon"
-        android:layout_width="6dp"
-        android:layout_height="6dp"
+        android:layout_width="@dimen/ingredient_dot_sizr"
+        android:layout_height="@dimen/ingredient_dot_sizr"
         android:layout_centerVertical="true"
         android:layout_marginStart="@dimen/margin_normal"
-        android:background="@drawable/ic_circle_davys_grey_solid" />
+        android:background="@drawable/ic_circle_davys_grey_solid"
+        android:contentDescription="@string/dot_icon_description" />
 
     <TextView
         android:id="@+id/ingredient_text"
