@@ -136,6 +136,7 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
 
         player.addListener(this);
         String userAgent = Util.getUserAgent(context, "MyBakingApp");
+
         MediaSource mediaSource = new ExtractorMediaSource(uri,
                 new DefaultDataSourceFactory(context, userAgent),
                 new DefaultExtractorsFactory(),
@@ -271,12 +272,22 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
 
     public Uri getUri() {
         if (isMediaAvailableForStep()) {
-            if (!getThumbnailURL().isEmpty()) {
+            if(!getVideoURL().isEmpty() && !getThumbnailURL().isEmpty()) {
+                return Uri.parse(getVideoURL());
+            } else if (!getThumbnailURL().isEmpty()) {
                 return Uri.parse(getThumbnailURL());
             } else if (!getVideoURL().isEmpty()) {
                 return Uri.parse(getVideoURL());
             }
         }
-        return null;
+        return Uri.parse("");
+    }
+
+    public boolean isUrlMp4() {
+        if(isMediaAvailableForStep()) {
+            return getThumbnailURL().contains(".mp4") || getVideoURL().contains(".mp4");
+        } else {
+            return false;
+        }
     }
 }

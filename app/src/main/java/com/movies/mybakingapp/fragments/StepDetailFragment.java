@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +22,7 @@ import com.movies.mybakingapp.R;
 import com.movies.mybakingapp.modal.Step;
 import com.movies.mybakingapp.utilities.ConnectionUtils;
 import com.movies.mybakingapp.viewmodels.RecipeDetailViewModel;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -31,7 +33,6 @@ import static com.movies.mybakingapp.activities.RecipeInstructionsActivity.STEP_
 public class StepDetailFragment extends Fragment {
     public static final String MEDIA_SESSION_TAG = StepDetailFragment.class.getSimpleName();
     private RecipeDetailViewModel detailViewModel;
-    private TextView stepDetail;
     private SimpleExoPlayerView simpleExoPlayerView;
     private Dialog fullScreenDialog;
 
@@ -41,29 +42,18 @@ public class StepDetailFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        detailViewModel = ViewModelProviders.of(getActivity()).get(RecipeDetailViewModel.class);
+        detailViewModel = ViewModelProviders.of(requireActivity()).get(RecipeDetailViewModel.class);
         detailViewModel.setExoPlayer(getActivity());
         detailViewModel.setStepClicked(true);
         initFullScreenDialog();
         final View rootView = inflater.inflate(R.layout.fragment_step_detail, container, false);
-
-        stepDetail = rootView.findViewById(R.id.step_full_description);
+        TextView stepDetail = rootView.findViewById(R.id.step_full_description);
         simpleExoPlayerView = rootView.findViewById(R.id.playerView);
+        ImageView imageView = rootView.findViewById(R.id.step_image);
 
         stepDetail.setText(detailViewModel.getStepLongDescription());
-        // Show player only if there's available network
-        if (ConnectionUtils.isNetworkAvailable(getActivity())) {
-            if (detailViewModel.isMediaAvailableForStep()) {
-                simpleExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.grey_background));
-                detailViewModel.initialiseMediaSession(getActivity(), MEDIA_SESSION_TAG, detailViewModel.getExoPlayer());
-                detailViewModel.initialisePlayer(simpleExoPlayerView, detailViewModel.getUri(), detailViewModel.getExoPlayer(), getActivity());
-            } else {
-                simpleExoPlayerView.setVisibility(View.GONE);
-            }
-        } else {
-            simpleExoPlayerView.setVisibility(View.GONE);
-            Toast.makeText(getActivity(), getString(R.string.no_network_message), Toast.LENGTH_SHORT).show();
-        }
+        showMedia(imageView, simpleExoPlayerView);
+
         if (savedInstanceState == null && !detailViewModel.isTwoPaneMode()) {
             if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
                 openFullScreenDialog();
@@ -75,22 +65,53 @@ public class StepDetailFragment extends Fragment {
         return rootView;
     }
 
+    private void showMedia(ImageView imageView, SimpleExoPlayerView simpleExoPlayerView) {
+        if (detailViewModel.isUrlMp4()) {
+            if (detailViewModel.isUrlMp4()) {
+                imageView.setVisibility(View.GONE);
+                simpleExoPlayerView.setVisibility(View.VISIBLE);
+                simpleExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.grey_background));
+                detailViewModel.initialiseMediaSession(requireActivity(), MEDIA_SESSION_TAG, detailViewModel.getExoPlayer());
+                detailViewModel.initialisePlayer(simpleExoPlayerView, detailViewModel.getUri(), detailViewModel.getExoPlayer(), getActivity());
+            } else {
+                showImageInsteadOfVideo(simpleExoPlayerView, imageView);
+            }
+        } else {
+            simpleExoPlayerView.setVisibility(View.GONE);
+            imageView.setVisibility(View.GONE);
+        }
+        if (ConnectionUtils.isNetworkAvailable(requireActivity())) {
+        } else {
+            Toast.makeText(getActivity(), getString(R.string.no_network_message), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showImageInsteadOfVideo(SimpleExoPlayerView simpleExoPlayerView, ImageView imageView) {
+        simpleExoPlayerView.setVisibility(View.GONE);
+        imageView.setVisibility(View.VISIBLE);
+        Picasso.get()
+                .load(detailViewModel.getUri())
+                .placeholder(R.drawable.ic_launcher_background)
+                .into(imageView);
+
+    }
+
     @Override
     public void onDestroy() {
-        super.onDestroy();
         detailViewModel.releasePlayer();
         detailViewModel.getMediaSession(getActivity(), MEDIA_SESSION_TAG).setActive(false);
+        super.onDestroy();
     }
 
     @Override
     public void onPause() {
-        super.onPause();
         if (detailViewModel.getExoPlayer() != null) {
             if (detailViewModel.getExoPlayer().getPlaybackState() == ExoPlayer.STATE_READY) {
                 detailViewModel.getExoPlayer().setPlayWhenReady(false);
                 detailViewModel.getMediaSession(getActivity(), MEDIA_SESSION_TAG).setActive(false);
             }
         }
+        super.onPause();
     }
 
     @Override
@@ -116,7 +137,7 @@ public class StepDetailFragment extends Fragment {
     }
 
     private void initFullScreenDialog() {
-        fullScreenDialog = new Dialog(getActivity(), android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
+        fullScreenDialog = new Dialog(requireActivity(), android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
             public void onBackPressed() {
                 closeFullScreenDialog(new RecipeDetailFragment(), RECIPE_FRAGMENT);
             }

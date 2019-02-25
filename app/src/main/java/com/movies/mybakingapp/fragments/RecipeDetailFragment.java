@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.movies.mybakingapp.R;
-import com.movies.mybakingapp.activities.RecipeInstructionsActivity;
 import com.movies.mybakingapp.adapters.IngredientsAdapter;
 import com.movies.mybakingapp.adapters.StepsAdapter;
 import com.movies.mybakingapp.modal.Step;
@@ -28,23 +27,28 @@ public class RecipeDetailFragment extends Fragment implements StepsAdapter.ItemC
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_recipe_detail, container, false);
-        detailViewModel = ViewModelProviders.of(getActivity()).get(RecipeDetailViewModel.class);
+        detailViewModel = ViewModelProviders.of(requireActivity()).get(RecipeDetailViewModel.class);
 
-        //Ingredients
-        RecyclerView.LayoutManager ingredientsLayout = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-        RecyclerView ingredientsRecyclerView = rootView.findViewById(R.id.ingredients_recycler_view);
-        IngredientsAdapter ingredientsAdapter = new IngredientsAdapter(detailViewModel.getCurrentRecipe().getIngredientsList());
-        ingredientsRecyclerView.setLayoutManager(ingredientsLayout);
-        ingredientsRecyclerView.setAdapter(ingredientsAdapter);
+        setupIngredientsList(rootView);
+        setupStepList(rootView);
 
-        //Step
+        return rootView;
+    }
+
+    private void setupStepList(View rootView) {
         RecyclerView.LayoutManager stepLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         RecyclerView stepsRecyclerView = rootView.findViewById(R.id.steps_recycler_view);
         StepsAdapter stepsAdapter = new StepsAdapter(detailViewModel.getCurrentRecipe().getStepsList(), this, detailViewModel);
         stepsRecyclerView.setLayoutManager(stepLayoutManager);
         stepsRecyclerView.setAdapter(stepsAdapter);
+    }
 
-        return rootView;
+    private void setupIngredientsList(View rootView) {
+        RecyclerView.LayoutManager ingredientsLayout = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
+        RecyclerView ingredientsRecyclerView = rootView.findViewById(R.id.ingredients_recycler_view);
+        IngredientsAdapter ingredientsAdapter = new IngredientsAdapter(detailViewModel.getCurrentRecipe().getIngredientsList());
+        ingredientsRecyclerView.setLayoutManager(ingredientsLayout);
+        ingredientsRecyclerView.setAdapter(ingredientsAdapter);
     }
 
     @Override
