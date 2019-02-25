@@ -5,7 +5,6 @@ import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
-import android.widget.Toast;
 
 import com.movies.mybakingapp.modal.Recipe;
 import com.movies.mybakingapp.network.GetRecipesService;
@@ -19,11 +18,10 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainRecipeListViewModel extends AndroidViewModel {
-    MutableLiveData<List<Recipe>> recipeList;
+    private MutableLiveData<List<Recipe>> recipeList = new MutableLiveData<>();
 
     public MainRecipeListViewModel(@NonNull Application application) {
         super(application);
-        this.recipeList = new MutableLiveData<>();
     }
 
     public LiveData<List<Recipe>> getRecipeList() {
@@ -37,12 +35,12 @@ public class MainRecipeListViewModel extends AndroidViewModel {
                 Call<List<Recipe>> call = service.getRecipeList();
                 call.enqueue(new Callback<List<Recipe>>() {
                     @Override
-                    public void onResponse(Call<List<Recipe>> call, Response<List<Recipe>> response) {
+                    public void onResponse(@NonNull Call<List<Recipe>> call, @NonNull Response<List<Recipe>> response) {
                         recipeList.postValue(response.body());
                     }
 
                     @Override
-                    public void onFailure(Call<List<Recipe>> call, Throwable t) {
+                    public void onFailure(@NonNull Call<List<Recipe>> call, @NonNull Throwable t) {
                         recipeList.postValue(Collections.<Recipe>emptyList());
                     }
                 });

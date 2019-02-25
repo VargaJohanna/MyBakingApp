@@ -8,7 +8,7 @@ public class RetrofitInstance {
     private static final String BASE_URL = "https://d17h27t6h515a5.cloudfront.net";
 
     public static Retrofit getInstance() {
-        if(retrofit == null) {
+        if (retrofit == null) {
             retrofit = new Retrofit.Builder()
                     .baseUrl(BASE_URL)
                     .addConverterFactory(GsonConverterFactory.create())

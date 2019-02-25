@@ -16,7 +16,7 @@ import com.movies.mybakingapp.viewmodels.RecipeDetailViewModel;
 import java.util.List;
 
 public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapterViewHolder> {
-    List<Step> stepsList;
+    private List<Step> stepsList;
     final private ItemClickListenerSteps itemClickListenerSteps;
     private RecipeDetailViewModel detailViewModel;
 
@@ -42,8 +42,8 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapter
             // Set background and text colour of the selected item
             viewHolder.itemView.setBackgroundColor(ContextCompat.getColor(viewHolder.stepShortDescription.getContext(), R.color.colorAccent));
             viewHolder.stepShortDescription.setTextColor(ContextCompat.getColor(viewHolder.stepShortDescription.getContext(), R.color.primary_text));
-            // Reset the colour of the first item
         } else {
+            // Reset the colour of the first item
             viewHolder.itemView.setBackgroundColor(Color.WHITE);
             viewHolder.stepShortDescription.setTextColor(ContextCompat.getColor(viewHolder.stepShortDescription.getContext(), R.color.secondary_text));
         }
@@ -57,7 +57,7 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapter
     public class StepsAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final TextView stepShortDescription;
 
-        public StepsAdapterViewHolder(@NonNull View itemView) {
+        StepsAdapterViewHolder(@NonNull View itemView) {
             super(itemView);
             stepShortDescription = itemView.findViewById(R.id.step_short_description);
             itemView.setOnClickListener(this);

@@ -29,36 +29,33 @@ import java.util.List;
 public class MainRecipeListActivity extends AppCompatActivity implements RecipeAdapter.ItemClickListener {
     public static int recipePosition = 0;
     ActivityMainRecipeListBinding mBinding;
-    private RecyclerView recyclerView;
-    private MainRecipeListViewModel viewModel;
-    private RecipeAdapter mainAdapter;
-    private GetRecipesService service;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_recipe_list);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main_recipe_list);
-        recyclerView = findViewById(R.id.recipe_recycle_list);
-        viewModel = ViewModelProviders.of(this).get(MainRecipeListViewModel.class);
-        mainAdapter = new RecipeAdapter(new ArrayList<Recipe>(), this);
-        service = RetrofitInstance.getInstance().create(GetRecipesService.class);
+        RecyclerView recyclerView = findViewById(R.id.recipe_recycle_list);
+        MainRecipeListViewModel viewModel = ViewModelProviders.of(this).get(MainRecipeListViewModel.class);
+        RecipeAdapter mainAdapter = new RecipeAdapter(new ArrayList<Recipe>(), this);
+        GetRecipesService service = RetrofitInstance.getInstance().create(GetRecipesService.class);
         viewModel.fetchRecipeList(service);
-        observeRecipeList();
-        generateRecipeList();
+        observeRecipeList(viewModel, mainAdapter);
+        generateRecipeList(recyclerView, mainAdapter);
     }
 
-    private void generateRecipeList() {
+    private void generateRecipeList(RecyclerView recyclerView, RecipeAdapter mainAdapter) {
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, getResources().getInteger(R.integer.recipe_list_columns));
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(mainAdapter);
     }
 
-    private void observeRecipeList() {
+    private void observeRecipeList(MainRecipeListViewModel viewModel, final RecipeAdapter mainAdapter) {
         mBinding.progressBarRecipeList.setVisibility(View.VISIBLE);
         viewModel.getRecipeList().observe(MainRecipeListActivity.this, new Observer<List<Recipe>>() {
             @Override
             public void onChanged(@Nullable List<Recipe> recipeList) {
+                assert recipeList != null;
                 if (!recipeList.isEmpty()) {
                     mainAdapter.updateList(recipeList);
                 } else {

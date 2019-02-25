@@ -40,10 +40,10 @@ public class IngredientsAdapter extends RecyclerView.Adapter<IngredientsAdapter.
         return ingredientsList.size();
     }
 
-    public class IngredientsAdapterViewHolder extends RecyclerView.ViewHolder {
+    class IngredientsAdapterViewHolder extends RecyclerView.ViewHolder {
         private final TextView quantityText;
 
-        public IngredientsAdapterViewHolder(@NonNull View itemView) {
+        IngredientsAdapterViewHolder(@NonNull View itemView) {
             super(itemView);
             quantityText = itemView.findViewById(R.id.ingredient_text);
         }

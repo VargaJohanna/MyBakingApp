@@ -16,7 +16,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeAdap
     private List<Recipe> recipeList;
     final private ItemClickListener itemClickListener;
 
-    public RecipeAdapter(List<Recipe> recipeList, ItemClickListener itemClickListener){
+    public RecipeAdapter(List<Recipe> recipeList, ItemClickListener itemClickListener) {
         this.recipeList = recipeList;
         this.itemClickListener = itemClickListener;
     }
@@ -46,6 +46,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeAdap
 
     class RecipeAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final TextView recipeName;
+
         RecipeAdapterViewHolder(@NonNull View itemView) {
             super(itemView);
             recipeName = itemView.findViewById(R.id.recipe_name);

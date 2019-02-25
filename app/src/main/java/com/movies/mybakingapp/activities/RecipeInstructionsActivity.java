@@ -73,6 +73,7 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
         detailViewModel.getCurrentStep().observe(this, new Observer<Step>() {
             @Override
             public void onChanged(@Nullable Step step) {
+                assert step != null;
                 detailViewModel.setVideoURL(step.getVideoURL());
                 detailViewModel.setThumbnailURL(step.getThumbnailURL());
                 detailViewModel.setStepLongDescription(step.getDescription());

@@ -2,6 +2,7 @@ package com.movies.mybakingapp.widgets;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -14,6 +15,7 @@ import com.movies.mybakingapp.network.GetRecipesService;
 import com.movies.mybakingapp.network.RetrofitInstance;
 import com.movies.mybakingapp.utilities.AppExecutors;
 
+import java.util.Collections;
 import java.util.List;
 
 import retrofit2.Call;
@@ -25,7 +27,7 @@ class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
     private List<Recipe> recipeList;
     private int recipePosition = 0;
 
-    public ListRemoteViewsFactory(Context applicationContext) {
+    ListRemoteViewsFactory(Context applicationContext) {
         mContext = applicationContext;
     }
 
@@ -48,14 +50,14 @@ class ListRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
                 Call<List<Recipe>> call = service.getRecipeList();
                 call.enqueue(new Callback<List<Recipe>>() {
                     @Override
-                    public void onResponse(Call<List<Recipe>> call, Response<List<Recipe>> response) {
+                    public void onResponse(@NonNull Call<List<Recipe>> call, @NonNull Response<List<Recipe>> response) {
                         recipeList = response.body();
-                        Log.d("RECIPESERVICE", "Success");
                     }
 
                     @Override
-                    public void onFailure(Call<List<Recipe>> call, Throwable t) {
+                    public void onFailure(@NonNull Call<List<Recipe>> call, @NonNull Throwable t) {
                         //Handle failure
+                        recipeList = Collections.emptyList();
                         Log.d("RECIPESERVICE", "Failure" + t.getMessage());
                     }
                 });

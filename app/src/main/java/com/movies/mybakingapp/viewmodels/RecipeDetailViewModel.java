@@ -34,7 +34,7 @@ import com.movies.mybakingapp.modal.Recipe;
 import com.movies.mybakingapp.modal.Step;
 
 public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer.EventListener {
-    private MutableLiveData<Step> currentStep;
+    private MutableLiveData<Step> currentStep = new MutableLiveData<>();
     private int currentStepPosition;
     private Recipe currentRecipe;
     private MediaSessionCompat mediaSession;
@@ -50,7 +50,6 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
 
     public RecipeDetailViewModel(@NonNull Application application) {
         super(application);
-        this.currentStep = new MutableLiveData<>();
     }
 
     // Step Data
@@ -152,7 +151,7 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
         return mediaSession;
     }
 
-    public PlaybackStateCompat.Builder getStateBuilder() {
+    private PlaybackStateCompat.Builder getStateBuilder() {
         if (playbackStateBuilder == null) {
             this.playbackStateBuilder = new PlaybackStateCompat.Builder()
                     .setActions(
@@ -213,7 +212,7 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
     private class MySessionCallback extends MediaSessionCompat.Callback {
         private SimpleExoPlayer exoPlayer;
 
-        public MySessionCallback(SimpleExoPlayer exoPlayer) {
+        MySessionCallback(SimpleExoPlayer exoPlayer) {
             this.exoPlayer = exoPlayer;
         }
 
@@ -250,7 +249,7 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
         StepLongDescription = stepLongDescription;
     }
 
-    public String getVideoURL() {
+    private String getVideoURL() {
         return videoURL;
     }
 
@@ -258,7 +257,7 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
         this.videoURL = videoURL;
     }
 
-    public String getThumbnailURL() {
+    private String getThumbnailURL() {
         return thumbnailURL;
     }
 
@@ -272,7 +271,7 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
 
     public Uri getUri() {
         if (isMediaAvailableForStep()) {
-            if(!getVideoURL().isEmpty() && !getThumbnailURL().isEmpty()) {
+            if (!getVideoURL().isEmpty() && !getThumbnailURL().isEmpty()) {
                 return Uri.parse(getVideoURL());
             } else if (!getThumbnailURL().isEmpty()) {
                 return Uri.parse(getThumbnailURL());
@@ -284,7 +283,7 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
     }
 
     public boolean isUrlMp4() {
-        if(isMediaAvailableForStep()) {
+        if (isMediaAvailableForStep()) {
             return getThumbnailURL().contains(".mp4") || getVideoURL().contains(".mp4");
         } else {
             return false;

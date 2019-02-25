@@ -23,7 +23,7 @@ public class ConnectionUtils {
                 if (ni.isConnected())
                     isMobileDataUsed = true;
         }
-        if(isMobileDataUsed && !isWifiUsed) {
+        if (isMobileDataUsed && !isWifiUsed) {
             Toast.makeText(context, context.getString(R.string.mobile_data_used_message), Toast.LENGTH_SHORT).show();
         }
         return isWifiUsed || isMobileDataUsed;
