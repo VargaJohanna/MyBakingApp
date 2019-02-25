@@ -29,6 +29,7 @@ import java.util.List;
 public class MainRecipeListActivity extends AppCompatActivity implements RecipeAdapter.ItemClickListener {
     public static int recipePosition = 0;
     ActivityMainRecipeListBinding mBinding;
+    private RecyclerView recyclerView;
     private MainRecipeListViewModel viewModel;
     private RecipeAdapter mainAdapter;
     private GetRecipesService service;
@@ -38,6 +39,7 @@ public class MainRecipeListActivity extends AppCompatActivity implements RecipeA
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_recipe_list);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main_recipe_list);
+        recyclerView = findViewById(R.id.recipe_recycle_list);
         viewModel = ViewModelProviders.of(this).get(MainRecipeListViewModel.class);
         mainAdapter = new RecipeAdapter(new ArrayList<Recipe>(), this);
         service = RetrofitInstance.getInstance().create(GetRecipesService.class);
@@ -48,8 +50,8 @@ public class MainRecipeListActivity extends AppCompatActivity implements RecipeA
 
     private void generateRecipeList() {
         RecyclerView.LayoutManager layoutManager = new GridLayoutManager(this, getResources().getInteger(R.integer.recipe_list_columns));
-        mBinding.recipeRecycleList.setLayoutManager(layoutManager);
-        mBinding.recipeRecycleList.setAdapter(mainAdapter);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(mainAdapter);
     }
 
     private void observeRecipeList() {
