@@ -66,7 +66,7 @@ public class StepDetailFragment extends Fragment {
     }
 
     private void showMedia(ImageView imageView, SimpleExoPlayerView simpleExoPlayerView) {
-        if (detailViewModel.isUrlMp4()) {
+        if (detailViewModel.isMediaAvailableForStep()) {
             if (detailViewModel.isUrlMp4()) {
                 imageView.setVisibility(View.GONE);
                 simpleExoPlayerView.setVisibility(View.VISIBLE);
