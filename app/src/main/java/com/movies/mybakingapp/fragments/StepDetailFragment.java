@@ -97,13 +97,6 @@ public class StepDetailFragment extends Fragment {
     }
 
     @Override
-    public void onDestroy() {
-        detailViewModel.releasePlayer();
-        detailViewModel.getMediaSession(getActivity(), MEDIA_SESSION_TAG).setActive(false);
-        super.onDestroy();
-    }
-
-    @Override
     public void onPause() {
         if (detailViewModel.getExoPlayer() != null) {
             if (detailViewModel.getExoPlayer().getPlaybackState() == ExoPlayer.STATE_READY) {

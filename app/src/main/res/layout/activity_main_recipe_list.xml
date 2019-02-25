@@ -34,7 +34,7 @@
             android:layout_margin="@dimen/margin_large"
             style="@style/TitleTextStyle"
             android:text="@string/no_recipes_message"
-            android:gravity="left"
+            android:gravity="start"
             android:paddingTop="@dimen/padding_normal"
             android:visibility="invisible"/>
 
