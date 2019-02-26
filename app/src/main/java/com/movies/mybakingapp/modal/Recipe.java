@@ -38,6 +38,15 @@ public class Recipe implements Parcelable {
         recipeImage = in.readString();
     }
 
+    public Recipe(int id, String name, List<Ingredients> ingredientsList, List<Step> stepsList, int servings, String recipeImage) {
+        this.id = id;
+        this.name = name;
+        this.ingredientsList = ingredientsList;
+        this.stepsList = stepsList;
+        this.servings = servings;
+        this.recipeImage = recipeImage;
+    }
+
     public static final Creator<Recipe> CREATOR = new Creator<Recipe>() {
         @Override
         public Recipe createFromParcel(Parcel in) {

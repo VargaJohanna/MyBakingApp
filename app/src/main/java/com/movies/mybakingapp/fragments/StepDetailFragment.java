@@ -1,6 +1,7 @@
 package com.movies.mybakingapp.fragments;
 
 import android.app.Dialog;
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
@@ -9,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +21,7 @@ import android.widget.Toast;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.movies.mybakingapp.R;
+import com.movies.mybakingapp.modal.Recipe;
 import com.movies.mybakingapp.modal.Step;
 import com.movies.mybakingapp.utilities.ConnectionUtils;
 import com.movies.mybakingapp.viewmodels.RecipeDetailViewModel;
@@ -32,6 +35,7 @@ import static com.movies.mybakingapp.activities.RecipeInstructionsActivity.STEP_
 
 public class StepDetailFragment extends Fragment {
     public static final String MEDIA_SESSION_TAG = StepDetailFragment.class.getSimpleName();
+    private static final String CURRENT_STEP_POSITION = "current_step_position";
     private RecipeDetailViewModel detailViewModel;
     private SimpleExoPlayerView simpleExoPlayerView;
     private Dialog fullScreenDialog;
@@ -41,9 +45,9 @@ public class StepDetailFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable final Bundle savedInstanceState) {
         detailViewModel = ViewModelProviders.of(requireActivity()).get(RecipeDetailViewModel.class);
-        detailViewModel.setExoPlayer(getActivity());
+        detailViewModel.setExoPlayer(requireActivity());
         detailViewModel.setStepClicked(true);
         initFullScreenDialog();
         final View rootView = inflater.inflate(R.layout.fragment_step_detail, container, false);
@@ -51,6 +55,12 @@ public class StepDetailFragment extends Fragment {
         simpleExoPlayerView = rootView.findViewById(R.id.playerView);
         ImageView imageView = rootView.findViewById(R.id.step_image);
 
+        if (savedInstanceState != null) {
+            Step currentStep = detailViewModel.getLatestAvailableRecipe().getStepsList().get(savedInstanceState.getInt(CURRENT_STEP_POSITION));
+            detailViewModel.setCurrentStepDetails(currentStep);
+            detailViewModel.setSelectedStepPosition(savedInstanceState.getInt(CURRENT_STEP_POSITION));
+
+        }
         stepDetail.setText(detailViewModel.getStepLongDescription());
         showMedia(imageView, simpleExoPlayerView);
 
@@ -72,7 +82,7 @@ public class StepDetailFragment extends Fragment {
                 simpleExoPlayerView.setVisibility(View.VISIBLE);
                 simpleExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.grey_background));
                 detailViewModel.initialiseMediaSession(requireActivity(), MEDIA_SESSION_TAG, detailViewModel.getExoPlayer());
-                detailViewModel.initialisePlayer(simpleExoPlayerView, detailViewModel.getUri(), detailViewModel.getExoPlayer(), getActivity());
+                detailViewModel.initialisePlayer(simpleExoPlayerView, detailViewModel.getUri(), detailViewModel.getExoPlayer(), requireActivity());
             } else {
                 showImageInsteadOfVideo(simpleExoPlayerView, imageView);
             }
@@ -82,7 +92,7 @@ public class StepDetailFragment extends Fragment {
         }
         if (ConnectionUtils.isNetworkAvailable(requireActivity())) {
         } else {
-            Toast.makeText(getActivity(), getString(R.string.no_network_message), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireActivity(), getString(R.string.no_network_message), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -101,7 +111,7 @@ public class StepDetailFragment extends Fragment {
         if (detailViewModel.getExoPlayer() != null) {
             if (detailViewModel.getExoPlayer().getPlaybackState() == ExoPlayer.STATE_READY) {
                 detailViewModel.getExoPlayer().setPlayWhenReady(false);
-                detailViewModel.getMediaSession(getActivity(), MEDIA_SESSION_TAG).setActive(false);
+                detailViewModel.getMediaSession(requireActivity(), MEDIA_SESSION_TAG).setActive(false);
             }
         }
         super.onPause();
@@ -113,9 +123,16 @@ public class StepDetailFragment extends Fragment {
         if (detailViewModel.getExoPlayer() != null) {
             if (detailViewModel.getExoPlayer().getPlaybackState() == ExoPlayer.STATE_IDLE) {
                 detailViewModel.getExoPlayer().setPlayWhenReady(true);
-                detailViewModel.getMediaSession(getActivity(), MEDIA_SESSION_TAG).setActive(true);
+                detailViewModel.getMediaSession(requireActivity(), MEDIA_SESSION_TAG).setActive(true);
             }
         }
+
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putInt(CURRENT_STEP_POSITION, detailViewModel.getCurrentStepPosition());
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -161,32 +178,39 @@ public class StepDetailFragment extends Fragment {
     }
 
     private void setUpButtonViews(final View preButton, final View nextButton) {
-        final List<Step> stepList = detailViewModel.getCurrentRecipe().getStepsList();
-        setButtonsVisibility(preButton, nextButton, stepList.size());
-        preButton.setOnClickListener(new View.OnClickListener() {
+        detailViewModel.getCurrentRecipe().observe(requireActivity(), new Observer<Recipe>() {
             @Override
-            public void onClick(View view) {
-                detailViewModel.releasePlayer();
-                detailViewModel.getMediaSession(getActivity(), MEDIA_SESSION_TAG).setActive(false);
-                if (detailViewModel.getCurrentStepPosition() - 1 > 0) {
-                    detailViewModel.setCurrentStep(stepList.get(detailViewModel.getCurrentStepPosition() - 1));
-                    detailViewModel.setSelectedStepPosition(detailViewModel.getCurrentStepPosition());
-                } else {
-                    detailViewModel.setCurrentStep(stepList.get(0));
-                    detailViewModel.setSelectedStepPosition(0);
-                }
-            }
-        });
-        nextButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                detailViewModel.releasePlayer();
-                detailViewModel.getMediaSession(getActivity(), MEDIA_SESSION_TAG).setActive(false);
-                if (detailViewModel.getCurrentStepPosition() + 1 < stepList.size()) {
-                    detailViewModel.setCurrentStep(stepList.get(detailViewModel.getCurrentStepPosition() + 1));
-                    detailViewModel.setSelectedStepPosition(detailViewModel.getCurrentStepPosition());
-                } else {
-                    nextButton.setVisibility(View.INVISIBLE);
+            public void onChanged(@Nullable Recipe recipe) {
+                if (recipe != null) {
+                    final List<Step> stepList = recipe.getStepsList();
+                    setButtonsVisibility(preButton, nextButton, stepList.size());
+                    preButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            detailViewModel.releasePlayer();
+                            detailViewModel.getMediaSession(requireActivity(), MEDIA_SESSION_TAG).setActive(false);
+                            if (detailViewModel.getCurrentStepPosition() - 1 > 0) {
+                                detailViewModel.setCurrentStepDetails(stepList.get(detailViewModel.getCurrentStepPosition() - 1));
+                                detailViewModel.setSelectedStepPosition(detailViewModel.getCurrentStepPosition());
+                            } else {
+                                detailViewModel.setCurrentStepDetails(stepList.get(0));
+                                detailViewModel.setSelectedStepPosition(0);
+                            }
+                        }
+                    });
+                    nextButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            detailViewModel.releasePlayer();
+                            detailViewModel.getMediaSession(requireActivity(), MEDIA_SESSION_TAG).setActive(false);
+                            if (detailViewModel.getCurrentStepPosition() + 1 < stepList.size()) {
+                                detailViewModel.setCurrentStepDetails(stepList.get(detailViewModel.getCurrentStepPosition() + 1));
+                                detailViewModel.setSelectedStepPosition(detailViewModel.getCurrentStepPosition());
+                            } else {
+                                nextButton.setVisibility(View.INVISIBLE);
+                            }
+                        }
+                    });
                 }
             }
         });
@@ -208,5 +232,11 @@ public class StepDetailFragment extends Fragment {
             prevButton.setVisibility(View.INVISIBLE);
             nextButton.setVisibility(View.INVISIBLE);
         }
+    }
+
+    @Override
+    public void onStop() {
+        Log.d("STOP", "STOP");
+        super.onStop();
     }
 }

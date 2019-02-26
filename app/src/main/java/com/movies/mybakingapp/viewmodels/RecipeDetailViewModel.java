@@ -29,27 +29,88 @@ import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.movies.mybakingapp.database.AppDatabase;
+import com.movies.mybakingapp.database.RecipeEntry;
 import com.movies.mybakingapp.fragments.StepDetailFragment;
+import com.movies.mybakingapp.modal.Ingredients;
 import com.movies.mybakingapp.modal.Recipe;
 import com.movies.mybakingapp.modal.Step;
+import com.movies.mybakingapp.utilities.AppExecutors;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer.EventListener {
     private MutableLiveData<Step> currentStep = new MutableLiveData<>();
     private int currentStepPosition;
-    private Recipe currentRecipe;
+    private MutableLiveData<Recipe> liveRecipe = new MutableLiveData<>();
+    private Recipe lastAvailableRecipe;
     private MediaSessionCompat mediaSession;
     private SimpleExoPlayer exoPlayer;
     private PlaybackStateCompat.Builder playbackStateBuilder;
     private int selectedStepPosition = RecyclerView.NO_POSITION;
     private FragmentManager fragmentManager;
     private boolean twoPaneMode;
-    private String StepLongDescription;
+    private String stepLongDescription;
     private String videoURL;
     private String thumbnailURL;
     private boolean isStepClicked;
+    private AppDatabase database;
 
     public RecipeDetailViewModel(@NonNull Application application) {
         super(application);
+        database = AppDatabase.getInstance(application);
+    }
+
+    public void setCurrentRecipeValueFromDB() {
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                liveRecipe.postValue(convertRecipeEntryToRecipe(database.recipeDao().getCurrentRecipe()));
+                lastAvailableRecipe = convertRecipeEntryToRecipe(database.recipeDao().getCurrentRecipe());
+            }
+        });
+    }
+
+    public Recipe getLatestAvailableRecipe() {
+        return lastAvailableRecipe;
+    }
+
+    public LiveData<Recipe> getCurrentRecipe() {
+        return liveRecipe;
+    }
+
+    // Recipe Data
+    private Recipe convertRecipeEntryToRecipe(RecipeEntry entry) {
+        return new Recipe(
+                entry.getRecipeId(),
+                entry.getName(),
+                getIngredientsList(entry),
+                getStepsListFromEntry(entry),
+                entry.getServings(),
+                entry.getRecipeImage());
+    }
+
+    private List<Step> getStepsListFromEntry(RecipeEntry entry) {
+        List<Step> steps = new ArrayList<>();
+        for (int i = 0; i < entry.getStepIdList().size(); i++) {
+            steps.add(new Step(Integer.valueOf(entry.getStepIdList().get(i)),
+                    entry.getStepShortDescriptionList().get(i),
+                    entry.getStepLongDescriptionList().get(i),
+                    entry.getStepVideoUrlList().get(i),
+                    entry.getStepThumbnailUrlList().get(i)));
+        }
+        return steps;
+    }
+
+    private List<Ingredients> getIngredientsList(RecipeEntry entry) {
+        List<Ingredients> ingredients = new ArrayList<>();
+        for (int i = 0; i < entry.getIngredientsQuantityList().size(); i++) {
+            ingredients.add(new Ingredients(Float.valueOf(entry.getIngredientsQuantityList().get(i)),
+                    entry.getIngredientsMeasureList().get(i),
+                    entry.getIngredientsNameList().get(i)));
+        }
+        return ingredients;
     }
 
     // Step Data
@@ -57,7 +118,10 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
         return currentStep;
     }
 
-    public void setCurrentStep(Step currentStep) {
+    public void setCurrentStepDetails(Step currentStep) {
+        setThumbnailURL(currentStep.getThumbnailURL());
+        setVideoURL(currentStep.getVideoURL());
+        setStepLongDescription(currentStep.getDescription());
         this.currentStep.setValue(currentStep);
     }
 
@@ -67,10 +131,6 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
 
     public void setCurrentStepPosition(int currentStepPosition) {
         this.currentStepPosition = currentStepPosition;
-    }
-
-    public Step getFirstStep() {
-        return getCurrentRecipe().getStepsList().get(0);
     }
 
     public int getSelectedStepPosition() {
@@ -87,15 +147,6 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
 
     public void setStepClicked(boolean stepClicked) {
         isStepClicked = stepClicked;
-    }
-
-    // Recipe Data
-    public Recipe getCurrentRecipe() {
-        return currentRecipe;
-    }
-
-    public void setCurrentRecipe(Recipe currentRecipe) {
-        this.currentRecipe = currentRecipe;
     }
 
     // Fragment Manager
@@ -242,11 +293,11 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
 
     // Data from current step
     public String getStepLongDescription() {
-        return StepLongDescription;
+        return stepLongDescription;
     }
 
     public void setStepLongDescription(String stepLongDescription) {
-        StepLongDescription = stepLongDescription;
+        this.stepLongDescription = stepLongDescription;
     }
 
     private String getVideoURL() {
@@ -270,23 +321,18 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
     }
 
     public Uri getUri() {
-        if (isMediaAvailableForStep()) {
-            if (!getVideoURL().isEmpty() && !getThumbnailURL().isEmpty()) {
-                return Uri.parse(getVideoURL());
-            } else if (!getThumbnailURL().isEmpty()) {
-                return Uri.parse(getThumbnailURL());
-            } else if (!getVideoURL().isEmpty()) {
-                return Uri.parse(getVideoURL());
-            }
+        if (!getVideoURL().isEmpty() && !getThumbnailURL().isEmpty()) {
+            return Uri.parse(getVideoURL());
+        } else if (!getThumbnailURL().isEmpty()) {
+            return Uri.parse(getThumbnailURL());
+        } else if (!getVideoURL().isEmpty()) {
+            return Uri.parse(getVideoURL());
+        } else {
+            return Uri.EMPTY;
         }
-        return Uri.parse("");
     }
 
     public boolean isUrlMp4() {
-        if (isMediaAvailableForStep()) {
-            return getThumbnailURL().contains(".mp4") || getVideoURL().contains(".mp4");
-        } else {
-            return false;
-        }
+        return getThumbnailURL().contains(".mp4") || getVideoURL().contains(".mp4");
     }
 }

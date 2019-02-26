@@ -10,13 +10,13 @@ import android.widget.TextView;
 import com.movies.mybakingapp.R;
 import com.movies.mybakingapp.modal.Ingredients;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class IngredientsAdapter extends RecyclerView.Adapter<IngredientsAdapter.IngredientsAdapterViewHolder> {
-    private List<Ingredients> ingredientsList;
+    private List<Ingredients> ingredientsList = new ArrayList<>();
 
-    public IngredientsAdapter(List<Ingredients> ingredientsList) {
-        this.ingredientsList = ingredientsList;
+    public IngredientsAdapter() {
     }
 
     @NonNull
@@ -38,6 +38,11 @@ public class IngredientsAdapter extends RecyclerView.Adapter<IngredientsAdapter.
     @Override
     public int getItemCount() {
         return ingredientsList.size();
+    }
+
+    public void setList(List<Ingredients> ingredientsList) {
+        this.ingredientsList = ingredientsList;
+        notifyDataSetChanged();
     }
 
     class IngredientsAdapterViewHolder extends RecyclerView.ViewHolder {

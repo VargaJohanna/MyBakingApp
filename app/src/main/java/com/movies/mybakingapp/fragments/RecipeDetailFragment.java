@@ -1,5 +1,6 @@
 package com.movies.mybakingapp.fragments;
 
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,6 +15,7 @@ import android.view.ViewGroup;
 import com.movies.mybakingapp.R;
 import com.movies.mybakingapp.adapters.IngredientsAdapter;
 import com.movies.mybakingapp.adapters.StepsAdapter;
+import com.movies.mybakingapp.modal.Recipe;
 import com.movies.mybakingapp.modal.Step;
 import com.movies.mybakingapp.viewmodels.RecipeDetailViewModel;
 
@@ -38,22 +40,38 @@ public class RecipeDetailFragment extends Fragment implements StepsAdapter.ItemC
     private void setupStepList(View rootView) {
         RecyclerView.LayoutManager stepLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         RecyclerView stepsRecyclerView = rootView.findViewById(R.id.steps_recycler_view);
-        StepsAdapter stepsAdapter = new StepsAdapter(detailViewModel.getCurrentRecipe().getStepsList(), this, detailViewModel);
+        final StepsAdapter stepsAdapter = new StepsAdapter(this, detailViewModel);
         stepsRecyclerView.setLayoutManager(stepLayoutManager);
         stepsRecyclerView.setAdapter(stepsAdapter);
+        detailViewModel.getCurrentRecipe().observe(requireActivity(), new Observer<Recipe>() {
+            @Override
+            public void onChanged(@Nullable Recipe recipe) {
+                if (recipe != null) {
+                    stepsAdapter.setSteps(recipe.getStepsList());
+                }
+            }
+        });
     }
 
     private void setupIngredientsList(View rootView) {
         RecyclerView.LayoutManager ingredientsLayout = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         RecyclerView ingredientsRecyclerView = rootView.findViewById(R.id.ingredients_recycler_view);
-        IngredientsAdapter ingredientsAdapter = new IngredientsAdapter(detailViewModel.getCurrentRecipe().getIngredientsList());
+        final IngredientsAdapter ingredientsAdapter = new IngredientsAdapter();
         ingredientsRecyclerView.setLayoutManager(ingredientsLayout);
         ingredientsRecyclerView.setAdapter(ingredientsAdapter);
+        detailViewModel.getCurrentRecipe().observe(requireActivity(), new Observer<Recipe>() {
+            @Override
+            public void onChanged(@Nullable Recipe recipe) {
+                if (recipe != null) {
+                    ingredientsAdapter.setList(recipe.getIngredientsList());
+                }
+            }
+        });
     }
 
     @Override
     public void onItemClick(Step step) {
         detailViewModel.setStepClicked(true);
-        detailViewModel.setCurrentStep(step);
+        detailViewModel.setCurrentStepDetails(step);
     }
 }

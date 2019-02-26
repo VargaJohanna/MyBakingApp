@@ -13,15 +13,15 @@ import com.movies.mybakingapp.R;
 import com.movies.mybakingapp.modal.Step;
 import com.movies.mybakingapp.viewmodels.RecipeDetailViewModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapterViewHolder> {
-    private List<Step> stepsList;
+    private List<Step> stepsList = new ArrayList<>();
     final private ItemClickListenerSteps itemClickListenerSteps;
     private RecipeDetailViewModel detailViewModel;
 
-    public StepsAdapter(List<Step> stepsList, ItemClickListenerSteps itemClickListenerSteps, RecipeDetailViewModel viewModel) {
-        this.stepsList = stepsList;
+    public StepsAdapter(ItemClickListenerSteps itemClickListenerSteps, RecipeDetailViewModel viewModel) {
         this.itemClickListenerSteps = itemClickListenerSteps;
         this.detailViewModel = viewModel;
     }
@@ -52,6 +52,11 @@ public class StepsAdapter extends RecyclerView.Adapter<StepsAdapter.StepsAdapter
     @Override
     public int getItemCount() {
         return stepsList.size();
+    }
+
+    public void setSteps(List<Step> steps) {
+        this.stepsList = steps;
+        notifyDataSetChanged();
     }
 
     public class StepsAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
