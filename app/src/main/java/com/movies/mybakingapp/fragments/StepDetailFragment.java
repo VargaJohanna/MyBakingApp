@@ -3,14 +3,15 @@ package com.movies.mybakingapp.fragments;
 import android.app.Dialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.res.Configuration;
+import android.content.Context;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,8 +19,21 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.exoplayer2.DefaultLoadControl;
+import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.ExoPlayerFactory;
+import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
+import com.google.android.exoplayer2.source.ExtractorMediaSource;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.TrackGroupArray;
+import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
+import com.google.android.exoplayer2.util.Util;
 import com.movies.mybakingapp.R;
 import com.movies.mybakingapp.modal.Recipe;
 import com.movies.mybakingapp.modal.Step;
@@ -29,16 +43,20 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-import static com.movies.mybakingapp.activities.RecipeInstructionsActivity.FROM_STEP_TAG;
-import static com.movies.mybakingapp.activities.RecipeInstructionsActivity.RECIPE_FRAGMENT;
-import static com.movies.mybakingapp.activities.RecipeInstructionsActivity.STEP_FRAGMENT;
-
-public class StepDetailFragment extends Fragment {
+public class StepDetailFragment extends Fragment implements ExoPlayer.EventListener {
     public static final String MEDIA_SESSION_TAG = StepDetailFragment.class.getSimpleName();
     private static final String CURRENT_STEP_POSITION = "current_step_position";
+    private static final String CURRENT_PLAYER_POSITION = "current_player_position";
+    private static final String IS_PLAYER_PLAYING = "is_player_playing";
     private RecipeDetailViewModel detailViewModel;
     private SimpleExoPlayerView simpleExoPlayerView;
-    private Dialog fullScreenDialog;
+    ImageView imageView;
+    private long currentPlayerPosition;
+    private boolean isPlayerPlaying = true;
+    private PlaybackStateCompat.Builder playbackStateBuilder;
+    private MediaSessionCompat mediaSession;
+//    private SimpleExoPlayer player;
+
 
     public StepDetailFragment() {
     }
@@ -47,32 +65,93 @@ public class StepDetailFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable final Bundle savedInstanceState) {
         detailViewModel = ViewModelProviders.of(requireActivity()).get(RecipeDetailViewModel.class);
-        detailViewModel.setExoPlayer(requireActivity());
         detailViewModel.setStepClicked(true);
-        initFullScreenDialog();
         final View rootView = inflater.inflate(R.layout.fragment_step_detail, container, false);
         TextView stepDetail = rootView.findViewById(R.id.step_full_description);
         simpleExoPlayerView = rootView.findViewById(R.id.playerView);
-        ImageView imageView = rootView.findViewById(R.id.step_image);
+        imageView = rootView.findViewById(R.id.step_image);
+        if (detailViewModel.getLatestAvailableRecipe() == null) {
+            detailViewModel.setCurrentRecipeValueFromDB();
+        }
+
+        if (detailViewModel.getPlayer() != null) {
+            currentPlayerPosition = detailViewModel.getCurrentPlayerPosition();
+            isPlayerPlaying = detailViewModel.isPlayerPlaying();
+        }
 
         if (savedInstanceState != null) {
             Step currentStep = detailViewModel.getLatestAvailableRecipe().getStepsList().get(savedInstanceState.getInt(CURRENT_STEP_POSITION));
             detailViewModel.setCurrentStepDetails(currentStep);
             detailViewModel.setSelectedStepPosition(savedInstanceState.getInt(CURRENT_STEP_POSITION));
+            currentPlayerPosition = savedInstanceState.getLong(CURRENT_PLAYER_POSITION);
+            isPlayerPlaying = savedInstanceState.getBoolean(IS_PLAYER_PLAYING);
 
         }
+
         stepDetail.setText(detailViewModel.getStepLongDescription());
         showMedia(imageView, simpleExoPlayerView);
 
-        if (savedInstanceState == null && !detailViewModel.isTwoPaneMode()) {
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                openFullScreenDialog();
-            }
-        }
         setUpButtonViews(rootView.findViewById(R.id.previous_button),
                 rootView.findViewById(R.id.next_button));
 
         return rootView;
+    }
+
+    @Override
+    public void onPause() {
+//        if(player != null) {
+//            currentPlayerPosition = player.getCurrentPosition();
+//            isPlayerPlaying = player.getPlayWhenReady();
+//            detailViewModel.setCurrentPlayerPosition(currentPlayerPosition);
+//            detailViewModel.setPlayerPlaying(isPlayerPlaying);
+//        } else
+        if (detailViewModel.getPlayer() != null) {
+            currentPlayerPosition = detailViewModel.getPlayer().getCurrentPosition();
+            isPlayerPlaying = detailViewModel.getPlayer().getPlayWhenReady();
+            detailViewModel.setCurrentPlayerPosition(currentPlayerPosition);
+            detailViewModel.setPlayerPlaying(isPlayerPlaying);
+        }
+
+        if (Util.SDK_INT <= 23) {
+            releasePlayer();
+            getMediaSession(requireActivity(), MEDIA_SESSION_TAG).setActive(false);
+        }
+        super.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        if (Util.SDK_INT > 23) {
+            releasePlayer();
+            getMediaSession(requireActivity(), MEDIA_SESSION_TAG).setActive(false);
+        }
+        super.onStop();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putInt(CURRENT_STEP_POSITION, detailViewModel.getCurrentStepPosition());
+        outState.putLong(CURRENT_PLAYER_POSITION, currentPlayerPosition);
+        outState.putBoolean(IS_PLAYER_PLAYING, isPlayerPlaying);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (Util.SDK_INT > 23 && detailViewModel.isMediaAvailableForStep()) {
+            initialisePlayer(simpleExoPlayerView, detailViewModel.getUri(), requireActivity());
+            initialiseMediaSession(MEDIA_SESSION_TAG, detailViewModel.getPlayer());
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if ((Util.SDK_INT <= 23 || detailViewModel.getPlayer() == null) && detailViewModel.isMediaAvailableForStep()) {
+            initialisePlayer(simpleExoPlayerView, detailViewModel.getUri(), requireActivity());
+            initialiseMediaSession(MEDIA_SESSION_TAG, detailViewModel.getPlayer());
+        }
     }
 
     private void showMedia(ImageView imageView, SimpleExoPlayerView simpleExoPlayerView) {
@@ -81,8 +160,6 @@ public class StepDetailFragment extends Fragment {
                 imageView.setVisibility(View.GONE);
                 simpleExoPlayerView.setVisibility(View.VISIBLE);
                 simpleExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.grey_background));
-                detailViewModel.initialiseMediaSession(requireActivity(), MEDIA_SESSION_TAG, detailViewModel.getExoPlayer());
-                detailViewModel.initialisePlayer(simpleExoPlayerView, detailViewModel.getUri(), detailViewModel.getExoPlayer(), requireActivity());
             } else {
                 showImageInsteadOfVideo(simpleExoPlayerView, imageView);
             }
@@ -106,77 +183,6 @@ public class StepDetailFragment extends Fragment {
 
     }
 
-    @Override
-    public void onPause() {
-        if (detailViewModel.getExoPlayer() != null) {
-            if (detailViewModel.getExoPlayer().getPlaybackState() == ExoPlayer.STATE_READY) {
-                detailViewModel.getExoPlayer().setPlayWhenReady(false);
-                detailViewModel.getMediaSession(requireActivity(), MEDIA_SESSION_TAG).setActive(false);
-            }
-        }
-        super.onPause();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if (detailViewModel.getExoPlayer() != null) {
-            if (detailViewModel.getExoPlayer().getPlaybackState() == ExoPlayer.STATE_IDLE) {
-                detailViewModel.getExoPlayer().setPlayWhenReady(true);
-                detailViewModel.getMediaSession(requireActivity(), MEDIA_SESSION_TAG).setActive(true);
-            }
-        }
-
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        outState.putInt(CURRENT_STEP_POSITION, detailViewModel.getCurrentStepPosition());
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE && !detailViewModel.isTwoPaneMode()) {
-            openFullScreenDialog();
-        } else {
-            closeFullScreenDialog(new StepDetailFragment(), STEP_FRAGMENT);
-        }
-    }
-
-    private void initFullScreenDialog() {
-        fullScreenDialog = new Dialog(requireActivity(), android.R.style.Theme_Black_NoTitleBar_Fullscreen) {
-            public void onBackPressed() {
-                closeFullScreenDialog(new RecipeDetailFragment(), RECIPE_FRAGMENT);
-            }
-        };
-    }
-
-    private void openFullScreenDialog() {
-        if (detailViewModel.isMediaAvailableForStep()) {
-            ((ViewGroup) simpleExoPlayerView.getParent()).removeView(simpleExoPlayerView);
-            fullScreenDialog.addContentView(simpleExoPlayerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            fullScreenDialog.show();
-        }
-    }
-
-    private void closeFullScreenDialog(Fragment fragment, String fragmentTag) {
-        ((ViewGroup) simpleExoPlayerView.getParent()).removeView(simpleExoPlayerView);
-        fullScreenDialog.dismiss();
-        replaceFragment(fragment, fragmentTag);
-        detailViewModel.releasePlayer();
-    }
-
-    private void replaceFragment(Fragment fragment, String fragmentTag) {
-        detailViewModel.getFragmentManager().beginTransaction()
-                .replace(R.id.recipe_detail_fragment_framelayout, fragment, fragmentTag)
-                .addToBackStack(FROM_STEP_TAG)
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                .commit();
-    }
-
     private void setUpButtonViews(final View preButton, final View nextButton) {
         detailViewModel.getCurrentRecipe().observe(requireActivity(), new Observer<Recipe>() {
             @Override
@@ -187,8 +193,8 @@ public class StepDetailFragment extends Fragment {
                     preButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            detailViewModel.releasePlayer();
-                            detailViewModel.getMediaSession(requireActivity(), MEDIA_SESSION_TAG).setActive(false);
+                            releasePlayer();
+                            getMediaSession(requireActivity(), MEDIA_SESSION_TAG).setActive(false);
                             if (detailViewModel.getCurrentStepPosition() - 1 > 0) {
                                 detailViewModel.setCurrentStepDetails(stepList.get(detailViewModel.getCurrentStepPosition() - 1));
                                 detailViewModel.setSelectedStepPosition(detailViewModel.getCurrentStepPosition());
@@ -201,8 +207,8 @@ public class StepDetailFragment extends Fragment {
                     nextButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            detailViewModel.releasePlayer();
-                            detailViewModel.getMediaSession(requireActivity(), MEDIA_SESSION_TAG).setActive(false);
+                            releasePlayer();
+                            getMediaSession(requireActivity(), MEDIA_SESSION_TAG).setActive(false);
                             if (detailViewModel.getCurrentStepPosition() + 1 < stepList.size()) {
                                 detailViewModel.setCurrentStepDetails(stepList.get(detailViewModel.getCurrentStepPosition() + 1));
                                 detailViewModel.setSelectedStepPosition(detailViewModel.getCurrentStepPosition());
@@ -234,9 +240,135 @@ public class StepDetailFragment extends Fragment {
         }
     }
 
+    public MediaSessionCompat getMediaSession(Context context, String activityNameTag) {
+        if (mediaSession == null) {
+            this.mediaSession = new MediaSessionCompat(context, activityNameTag);
+        }
+        return mediaSession;
+    }
+
+    public void initialisePlayer(SimpleExoPlayerView view, Uri uri, Context context) {
+//        player = ExoPlayerFactory.newSimpleInstance(
+//                requireActivity(),
+//                new DefaultTrackSelector(), new DefaultLoadControl());
+//        view.setPlayer(player);
+//        player.addListener(this);
+//        String userAgent = Util.getUserAgent(context, "MyBakingApp");
+//
+//        MediaSource mediaSource = new ExtractorMediaSource(uri,
+//                new DefaultDataSourceFactory(context, userAgent),
+//                new DefaultExtractorsFactory(),
+//                null, null);
+//        player.prepare(mediaSource);
+//        player.seekTo(currentPlayerPosition);
+//        player.setPlayWhenReady(isPlayerPlaying);
+//        detailViewModel.setPlayer(player);
+
+        detailViewModel.setPlayer(ExoPlayerFactory.newSimpleInstance(
+                requireActivity(),
+                new DefaultTrackSelector(), new DefaultLoadControl()));
+        view.setPlayer(detailViewModel.getPlayer());
+        detailViewModel.getPlayer().addListener(this);
+        String userAgent = Util.getUserAgent(context, "MyBakingApp");
+
+        MediaSource mediaSource = new ExtractorMediaSource(uri,
+                new DefaultDataSourceFactory(context, userAgent),
+                new DefaultExtractorsFactory(),
+                null, null);
+        detailViewModel.getPlayer().prepare(mediaSource);
+        detailViewModel.getPlayer().seekTo(currentPlayerPosition);
+        detailViewModel.getPlayer().setPlayWhenReady(isPlayerPlaying);
+    }
+
+    private PlaybackStateCompat.Builder getStateBuilder() {
+        if (playbackStateBuilder == null) {
+            this.playbackStateBuilder = new PlaybackStateCompat.Builder()
+                    .setActions(
+                            PlaybackStateCompat.ACTION_PLAY |
+                                    PlaybackStateCompat.ACTION_PAUSE |
+                                    PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+                                    PlaybackStateCompat.ACTION_PLAY_PAUSE);
+        }
+        return playbackStateBuilder;
+    }
+
+    public void initialiseMediaSession(String activityNameTag, SimpleExoPlayer exoPlayer) {
+        MediaSessionCompat mediaSession = getMediaSession(requireActivity(), activityNameTag);
+        mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        mediaSession.setMediaButtonReceiver(null);
+        mediaSession.setPlaybackState(getStateBuilder().build());
+        mediaSession.setCallback(new MySessionCallback(exoPlayer));
+        mediaSession.setActive(true);
+    }
+
     @Override
-    public void onStop() {
-        Log.d("STOP", "STOP");
-        super.onStop();
+    public void onTimelineChanged(Timeline timeline, Object manifest) {
+
+    }
+
+    @Override
+    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+
+    }
+
+    @Override
+    public void onLoadingChanged(boolean isLoading) {
+
+    }
+
+    @Override
+    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+        if (playbackState == ExoPlayer.STATE_READY && playWhenReady) {
+            getStateBuilder().setState(PlaybackStateCompat.STATE_PLAYING,
+                    detailViewModel.getPlayer().getCurrentPosition(), 1f);
+        } else if (playbackState == ExoPlayer.STATE_READY) {
+            getStateBuilder().setState(PlaybackStateCompat.STATE_PAUSED,
+                    detailViewModel.getPlayer().getCurrentPosition(), 1f);
+        }
+        getMediaSession(requireActivity(), StepDetailFragment.MEDIA_SESSION_TAG).setPlaybackState(getStateBuilder().build());
+
+    }
+
+    @Override
+    public void onPlayerError(ExoPlaybackException error) {
+
+    }
+
+    @Override
+    public void onPositionDiscontinuity() {
+
+    }
+
+    private class MySessionCallback extends MediaSessionCompat.Callback {
+        private SimpleExoPlayer exoPlayer;
+
+        MySessionCallback(SimpleExoPlayer exoPlayer) {
+            this.exoPlayer = exoPlayer;
+        }
+
+        @Override
+        public void onPlay() {
+            exoPlayer.setPlayWhenReady(true);
+        }
+
+        @Override
+        public void onPause() {
+            exoPlayer.setPlayWhenReady(false);
+        }
+
+        @Override
+        public void onSkipToPrevious() {
+            exoPlayer.seekTo(0);
+        }
+    }
+
+    public void releasePlayer() {
+        if (detailViewModel.getPlayer() != null) {
+            detailViewModel.getPlayer().stop();
+            detailViewModel.getPlayer().release();
+            detailViewModel.setPlayer(null);
+            detailViewModel.setCurrentPlayerPosition(0);
+            detailViewModel.setPlayerPlaying(true);
+        }
     }
 }

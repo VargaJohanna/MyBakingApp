@@ -28,7 +28,7 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if(ConnectionUtils.isNetworkAvailable(this)) {
+        if (ConnectionUtils.isNetworkAvailable(this)) {
             setContentView(R.layout.activity_recipe_detail);
             detailViewModel = ViewModelProviders.of(this).get(RecipeDetailViewModel.class);
             detailViewModel.setFragmentManager(getSupportFragmentManager());
@@ -57,7 +57,7 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
             detailViewModel.getCurrentRecipe().observe(this, new Observer<Recipe>() {
                 @Override
                 public void onChanged(@Nullable Recipe recipe) {
-                    if(recipe != null) {
+                    if (recipe != null) {
                         setTitle(recipe.getName());
                     }
                 }
@@ -79,16 +79,20 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
                 detailViewModel.setCurrentStepPosition(step.getId());
 
                 if (detailViewModel.isTwoPaneMode()) {
-                    detailViewModel.getFragmentManager().beginTransaction()
-                            .replace(R.id.step_detail_fragment_framelayout, new StepDetailFragment(), STEP_FRAGMENT)
-                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                            .commit();
+                    if (detailViewModel.getFragmentManager().findFragmentByTag(STEP_FRAGMENT + step.getId()) == null) {
+                        detailViewModel.getFragmentManager().beginTransaction()
+                                .replace(R.id.step_detail_fragment_framelayout, new StepDetailFragment(), STEP_FRAGMENT + step.getId())
+                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                                .commit();
+                    }
                 } else if (!detailViewModel.isTwoPaneMode() && detailViewModel.isStepClicked()) {
-                    detailViewModel.getFragmentManager().beginTransaction()
-                            .replace(R.id.recipe_detail_fragment_framelayout, new StepDetailFragment(), STEP_FRAGMENT)
-                            .addToBackStack(FROM_STEP_TAG)
-                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                            .commit();
+                    if (detailViewModel.getFragmentManager().findFragmentByTag(STEP_FRAGMENT + step.getId()) == null) {
+                        detailViewModel.getFragmentManager().beginTransaction()
+                                .replace(R.id.recipe_detail_fragment_framelayout, new StepDetailFragment(), STEP_FRAGMENT + step.getId())
+                                .addToBackStack(FROM_STEP_TAG)
+                                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                                .commit();
+                    }
                 }
             }
         });
@@ -97,7 +101,7 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (!detailViewModel.isTwoPaneMode()) {
-            if (getSupportFragmentManager().findFragmentByTag(STEP_FRAGMENT) != null) {
+            if (getSupportFragmentManager().findFragmentById(R.id.recipe_detail_fragment_framelayout) != null) {
                 getSupportFragmentManager().popBackStack(FROM_STEP_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE);
             } else {
                 super.onBackPressed();

@@ -22,8 +22,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.RecipeInstructionsActivity"
-            android:configChanges="orientation" />
+            android:name=".activities.RecipeInstructionsActivity"/>
 
         <receiver android:name=".widgets.RecipeWidgetProvider">
             <intent-filter>

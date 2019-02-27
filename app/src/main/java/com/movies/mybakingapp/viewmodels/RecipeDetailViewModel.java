@@ -4,34 +4,14 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.content.Context;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.media.session.MediaSessionCompat;
-import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.widget.RecyclerView;
 
-import com.google.android.exoplayer2.DefaultLoadControl;
-import com.google.android.exoplayer2.ExoPlaybackException;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.LoadControl;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
-import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
-import com.google.android.exoplayer2.source.ExtractorMediaSource;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.TrackGroupArray;
-import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
-import com.google.android.exoplayer2.trackselection.TrackSelector;
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
-import com.google.android.exoplayer2.util.Util;
 import com.movies.mybakingapp.database.AppDatabase;
 import com.movies.mybakingapp.database.RecipeEntry;
-import com.movies.mybakingapp.fragments.StepDetailFragment;
 import com.movies.mybakingapp.modal.Ingredients;
 import com.movies.mybakingapp.modal.Recipe;
 import com.movies.mybakingapp.modal.Step;
@@ -40,14 +20,12 @@ import com.movies.mybakingapp.utilities.AppExecutors;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer.EventListener {
+public class RecipeDetailViewModel extends AndroidViewModel {
     private MutableLiveData<Step> currentStep = new MutableLiveData<>();
     private int currentStepPosition;
     private MutableLiveData<Recipe> liveRecipe = new MutableLiveData<>();
     private Recipe lastAvailableRecipe;
-    private MediaSessionCompat mediaSession;
-    private SimpleExoPlayer exoPlayer;
-    private PlaybackStateCompat.Builder playbackStateBuilder;
+
     private int selectedStepPosition = RecyclerView.NO_POSITION;
     private FragmentManager fragmentManager;
     private boolean twoPaneMode;
@@ -56,6 +34,9 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
     private String thumbnailURL;
     private boolean isStepClicked;
     private AppDatabase database;
+    private long currentPlayerPosition;
+    private boolean isPlayerPlaying = true;
+    private SimpleExoPlayer player;
 
     public RecipeDetailViewModel(@NonNull Application application) {
         super(application);
@@ -167,130 +148,6 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
         this.twoPaneMode = twoPaneMode;
     }
 
-
-    //Exoplayer methods
-    public void setExoPlayer(Context context) {
-        if (exoPlayer == null) {
-            TrackSelector trackSelector = new DefaultTrackSelector();
-            LoadControl loadControl = new DefaultLoadControl();
-            this.exoPlayer = ExoPlayerFactory.newSimpleInstance(context.getApplicationContext(), trackSelector, loadControl);
-        }
-    }
-
-    public SimpleExoPlayer getExoPlayer() {
-        return exoPlayer;
-    }
-
-    public void initialisePlayer(SimpleExoPlayerView view, Uri uri, SimpleExoPlayer player, Context context) {
-        view.setPlayer(player);
-
-        player.addListener(this);
-        String userAgent = Util.getUserAgent(context, "MyBakingApp");
-
-        MediaSource mediaSource = new ExtractorMediaSource(uri,
-                new DefaultDataSourceFactory(context, userAgent),
-                new DefaultExtractorsFactory(),
-                null, null);
-        player.prepare(mediaSource);
-        player.setPlayWhenReady(true);
-    }
-
-    public MediaSessionCompat getMediaSession(Context context, String activityNameTag) {
-        if (mediaSession == null) {
-            this.mediaSession = new MediaSessionCompat(context, activityNameTag);
-        }
-        return mediaSession;
-    }
-
-    private PlaybackStateCompat.Builder getStateBuilder() {
-        if (playbackStateBuilder == null) {
-            this.playbackStateBuilder = new PlaybackStateCompat.Builder()
-                    .setActions(
-                            PlaybackStateCompat.ACTION_PLAY |
-                                    PlaybackStateCompat.ACTION_PAUSE |
-                                    PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
-                                    PlaybackStateCompat.ACTION_PLAY_PAUSE);
-        }
-        return playbackStateBuilder;
-    }
-
-    public void initialiseMediaSession(Context context, String activityNameTag, SimpleExoPlayer exoPlayer) {
-        getMediaSession(context, activityNameTag);
-        mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
-        mediaSession.setMediaButtonReceiver(null);
-        mediaSession.setPlaybackState(getStateBuilder().build());
-        mediaSession.setCallback(new MySessionCallback(exoPlayer));
-        mediaSession.setActive(true);
-    }
-
-    @Override
-    public void onTimelineChanged(Timeline timeline, Object manifest) {
-
-    }
-
-    @Override
-    public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-
-    }
-
-    @Override
-    public void onLoadingChanged(boolean isLoading) {
-
-    }
-
-    @Override
-    public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-        if (playbackState == ExoPlayer.STATE_READY && playWhenReady) {
-            getStateBuilder().setState(PlaybackStateCompat.STATE_PLAYING,
-                    getExoPlayer().getCurrentPosition(), 1f);
-        } else if (playbackState == ExoPlayer.STATE_READY) {
-            getStateBuilder().setState(PlaybackStateCompat.STATE_PAUSED,
-                    getExoPlayer().getCurrentPosition(), 1f);
-        }
-        getMediaSession(getApplication(), StepDetailFragment.MEDIA_SESSION_TAG).setPlaybackState(getStateBuilder().build());
-    }
-
-    @Override
-    public void onPlayerError(ExoPlaybackException error) {
-
-    }
-
-    @Override
-    public void onPositionDiscontinuity() {
-
-    }
-
-    private class MySessionCallback extends MediaSessionCompat.Callback {
-        private SimpleExoPlayer exoPlayer;
-
-        MySessionCallback(SimpleExoPlayer exoPlayer) {
-            this.exoPlayer = exoPlayer;
-        }
-
-        @Override
-        public void onPlay() {
-            exoPlayer.setPlayWhenReady(true);
-        }
-
-        @Override
-        public void onPause() {
-            exoPlayer.setPlayWhenReady(false);
-        }
-
-        @Override
-        public void onSkipToPrevious() {
-            exoPlayer.seekTo(0);
-        }
-    }
-
-    public void releasePlayer() {
-        if (this.exoPlayer != null) {
-            this.exoPlayer.stop();
-            this.exoPlayer.release();
-            this.exoPlayer = null;
-        }
-    }
-
     // Data from current step
     public String getStepLongDescription() {
         return stepLongDescription;
@@ -334,5 +191,29 @@ public class RecipeDetailViewModel extends AndroidViewModel implements ExoPlayer
 
     public boolean isUrlMp4() {
         return getThumbnailURL().contains(".mp4") || getVideoURL().contains(".mp4");
+    }
+
+    public long getCurrentPlayerPosition() {
+        return currentPlayerPosition;
+    }
+
+    public void setCurrentPlayerPosition(long currentPlayerPosition) {
+        this.currentPlayerPosition = currentPlayerPosition;
+    }
+
+    public boolean isPlayerPlaying() {
+        return isPlayerPlaying;
+    }
+
+    public void setPlayerPlaying(boolean playerPlaying) {
+        isPlayerPlaying = playerPlaying;
+    }
+
+    public SimpleExoPlayer getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(SimpleExoPlayer player) {
+        this.player = player;
     }
 }
