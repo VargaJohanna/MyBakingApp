@@ -4,7 +4,6 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
@@ -108,7 +107,7 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (!detailViewModel.isTwoPaneMode()) {
             if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
-                getSupportFragmentManager().popBackStack( );
+                getSupportFragmentManager().popBackStack();
             } else {
                 super.onBackPressed();
             }

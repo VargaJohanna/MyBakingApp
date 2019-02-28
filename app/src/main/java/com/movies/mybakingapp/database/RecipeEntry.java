@@ -6,7 +6,6 @@ import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.arch.persistence.room.TypeConverters;
 
-import java.io.InputStream;
 import java.util.List;
 
 @Entity(tableName = "recipe")
@@ -166,7 +165,7 @@ public class RecipeEntry {
                        List<String> stepShortDescriptionList,
                        List<String> stepLongDescriptionList,
                        List<String> stepVideoUrlList,
-                       List<String> stepThumbnailUrlList){
+                       List<String> stepThumbnailUrlList) {
         this.name = name;
         this.recipeId = recipeId;
         this.servings = servings;
@@ -193,7 +192,7 @@ public class RecipeEntry {
                        List<String> stepShortDescriptionList,
                        List<String> stepLongDescriptionList,
                        List<String> stepVideoUrlList,
-                       List<String> stepThumbnailUrlList){
+                       List<String> stepThumbnailUrlList) {
         this.id = id;
         this.recipeId = recipeId;
         this.name = name;

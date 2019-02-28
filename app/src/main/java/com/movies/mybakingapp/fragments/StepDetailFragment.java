@@ -60,7 +60,6 @@ public class StepDetailFragment extends Fragment implements ExoPlayer.EventListe
     private boolean isPlayerPlaying = true;
     private PlaybackStateCompat.Builder playbackStateBuilder;
     private MediaSessionCompat mediaSession;
-//    private SimpleExoPlayer player;
 
 
     public StepDetailFragment() {
@@ -90,7 +89,7 @@ public class StepDetailFragment extends Fragment implements ExoPlayer.EventListe
         if (savedInstanceState != null) {
             List<Step> stepList = detailViewModel.getLatestAvailableRecipe().getStepsList();
             Step currentStep;
-            if(stepList.size() > savedInstanceState.getInt(CURRENT_STEP_POSITION)) {
+            if (stepList.size() > savedInstanceState.getInt(CURRENT_STEP_POSITION)) {
                 currentStep = stepList.get(savedInstanceState.getInt(CURRENT_STEP_POSITION));
             } else {
                 currentStep = stepList.get(0);
@@ -113,12 +112,6 @@ public class StepDetailFragment extends Fragment implements ExoPlayer.EventListe
 
     @Override
     public void onPause() {
-//        if(player != null) {
-//            currentPlayerPosition = player.getCurrentPosition();
-//            isPlayerPlaying = player.getPlayWhenReady();
-//            detailViewModel.setCurrentPlayerPosition(currentPlayerPosition);
-//            detailViewModel.setPlayerPlaying(isPlayerPlaying);
-//        } else
         if (detailViewModel.getPlayer() != null) {
             currentPlayerPosition = detailViewModel.getPlayer().getCurrentPosition();
             isPlayerPlaying = detailViewModel.getPlayer().getPlayWhenReady();
@@ -283,21 +276,6 @@ public class StepDetailFragment extends Fragment implements ExoPlayer.EventListe
     }
 
     public void initialisePlayer(SimpleExoPlayerView view, Uri uri, Context context) {
-//        player = ExoPlayerFactory.newSimpleInstance(
-//                requireActivity(),
-//                new DefaultTrackSelector(), new DefaultLoadControl());
-//        view.setPlayer(player);
-//        player.addListener(this);
-//        String userAgent = Util.getUserAgent(context, "MyBakingApp");
-//
-//        MediaSource mediaSource = new ExtractorMediaSource(uri,
-//                new DefaultDataSourceFactory(context, userAgent),
-//                new DefaultExtractorsFactory(),
-//                null, null);
-//        player.prepare(mediaSource);
-//        player.seekTo(currentPlayerPosition);
-//        player.setPlayWhenReady(isPlayerPlaying);
-//        detailViewModel.setPlayer(player);
 
         detailViewModel.setPlayer(ExoPlayerFactory.newSimpleInstance(
                 requireActivity(),

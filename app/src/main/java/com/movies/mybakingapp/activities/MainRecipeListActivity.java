@@ -113,7 +113,7 @@ public class MainRecipeListActivity extends AppCompatActivity implements RecipeA
 
     private List<String> getStepThumbUrlList(Recipe recipe) {
         List<String> stepThumbnailUrlList = new ArrayList<>();
-        for (Step step: recipe.getStepsList()) {
+        for (Step step : recipe.getStepsList()) {
             stepThumbnailUrlList.add(String.valueOf(step.getThumbnailURL()));
         }
         return stepThumbnailUrlList;
@@ -121,7 +121,7 @@ public class MainRecipeListActivity extends AppCompatActivity implements RecipeA
 
     private List<String> getStepVideoUrlList(Recipe recipe) {
         List<String> stepVideoUrlList = new ArrayList<>();
-        for (Step step: recipe.getStepsList()) {
+        for (Step step : recipe.getStepsList()) {
             stepVideoUrlList.add(String.valueOf(step.getVideoURL()));
         }
         return stepVideoUrlList;
@@ -129,7 +129,7 @@ public class MainRecipeListActivity extends AppCompatActivity implements RecipeA
 
     private List<String> getStepDescriptionList(Recipe recipe) {
         List<String> stepDescrList = new ArrayList<>();
-        for (Step step: recipe.getStepsList()) {
+        for (Step step : recipe.getStepsList()) {
             stepDescrList.add(String.valueOf(step.getDescription()));
         }
         return stepDescrList;
@@ -137,7 +137,7 @@ public class MainRecipeListActivity extends AppCompatActivity implements RecipeA
 
     private List<String> getStepShortDescriptionList(Recipe recipe) {
         List<String> stepShortDescrList = new ArrayList<>();
-        for (Step step: recipe.getStepsList()) {
+        for (Step step : recipe.getStepsList()) {
             stepShortDescrList.add(String.valueOf(step.getShortDescription()));
         }
         return stepShortDescrList;
@@ -145,7 +145,7 @@ public class MainRecipeListActivity extends AppCompatActivity implements RecipeA
 
     private List<String> getStepIdList(Recipe recipe) {
         List<String> stepIdList = new ArrayList<>();
-        for (Step step: recipe.getStepsList()) {
+        for (Step step : recipe.getStepsList()) {
             stepIdList.add(String.valueOf(step.getId()));
         }
         return stepIdList;
@@ -153,7 +153,7 @@ public class MainRecipeListActivity extends AppCompatActivity implements RecipeA
 
     private List<String> getIngredientsNameList(Recipe recipe) {
         List<String> ingredientNameList = new ArrayList<>();
-        for (Ingredients ingredients: recipe.getIngredientsList()) {
+        for (Ingredients ingredients : recipe.getIngredientsList()) {
             ingredientNameList.add(String.valueOf(ingredients.getIngredient()));
         }
         return ingredientNameList;
@@ -161,7 +161,7 @@ public class MainRecipeListActivity extends AppCompatActivity implements RecipeA
 
     private List<String> getIngredientsMeasureList(Recipe recipe) {
         List<String> measureList = new ArrayList<>();
-        for (Ingredients ingredients: recipe.getIngredientsList()) {
+        for (Ingredients ingredients : recipe.getIngredientsList()) {
             measureList.add(String.valueOf(ingredients.getMeasure()));
         }
         return measureList;
@@ -169,7 +169,7 @@ public class MainRecipeListActivity extends AppCompatActivity implements RecipeA
 
     private List<String> getIngredientsQuantityList(Recipe recipe) {
         List<String> quantityList = new ArrayList<>();
-        for (Ingredients ingredients: recipe.getIngredientsList()) {
+        for (Ingredients ingredients : recipe.getIngredientsList()) {
             quantityList.add(String.valueOf(ingredients.getQuantity()));
         }
         return quantityList;
