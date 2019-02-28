@@ -91,11 +91,12 @@ public class StepDetailFragment extends Fragment implements ExoPlayer.EventListe
             Step currentStep;
             if (stepList.size() > savedInstanceState.getInt(CURRENT_STEP_POSITION)) {
                 currentStep = stepList.get(savedInstanceState.getInt(CURRENT_STEP_POSITION));
+                detailViewModel.setSelectedStepPosition(savedInstanceState.getInt(CURRENT_STEP_POSITION));
             } else {
-                currentStep = stepList.get(0);
+                currentStep = stepList.get(stepList.size() - 1);
+                detailViewModel.setSelectedStepPosition(stepList.size() - 1);
             }
             detailViewModel.setCurrentStepDetails(currentStep);
-            detailViewModel.setSelectedStepPosition(savedInstanceState.getInt(CURRENT_STEP_POSITION));
             currentPlayerPosition = savedInstanceState.getLong(CURRENT_PLAYER_POSITION);
             isPlayerPlaying = savedInstanceState.getBoolean(IS_PLAYER_PLAYING);
 
