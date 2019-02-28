@@ -202,6 +202,7 @@ public class StepDetailFragment extends Fragment implements ExoPlayer.EventListe
                                 detailViewModel.setCurrentStepDetails(stepList.get(0));
                                 detailViewModel.setSelectedStepPosition(0);
                             }
+                            getFragmentManager().popBackStack();
                         }
                     });
                     nextButton.setOnClickListener(new View.OnClickListener() {
