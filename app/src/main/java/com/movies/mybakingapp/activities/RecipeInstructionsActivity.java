@@ -101,8 +101,8 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (!detailViewModel.isTwoPaneMode()) {
-            if (getSupportFragmentManager().findFragmentById(R.id.recipe_detail_fragment_framelayout) != null) {
-                getSupportFragmentManager().popBackStack(FROM_STEP_TAG, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
+                getSupportFragmentManager().popBackStack( );
             } else {
                 super.onBackPressed();
             }
