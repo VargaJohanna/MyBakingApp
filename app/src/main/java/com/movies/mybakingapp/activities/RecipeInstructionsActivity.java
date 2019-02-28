@@ -45,12 +45,18 @@ public class RecipeInstructionsActivity extends AppCompatActivity {
                         .commit();
 
                 if (detailViewModel.isTwoPaneMode()) {
-                    detailViewModel.setCurrentStepDetails(detailViewModel.getLatestAvailableRecipe().getStepsList().get(0));
-                    detailViewModel.setSelectedStepPosition(0);
-                    detailViewModel.getFragmentManager().beginTransaction()
-                            .replace(R.id.step_detail_fragment_framelayout, new StepDetailFragment(), STEP_FRAGMENT)
-                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
-                            .commit();
+                    detailViewModel.getCurrentRecipe().observe(this, new Observer<Recipe>() {
+                        @Override
+                        public void onChanged(@Nullable Recipe recipe) {
+                            detailViewModel.setCurrentStepDetails(recipe.getStepsList().get(0));
+                            detailViewModel.setSelectedStepPosition(0);
+                            detailViewModel.getFragmentManager().beginTransaction()
+                                    .replace(R.id.step_detail_fragment_framelayout, new StepDetailFragment(), STEP_FRAGMENT)
+                                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                                    .commit();
+                        }
+                    });
+
                 }
             }
             observeActiveStep();

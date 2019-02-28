@@ -1,20 +1,23 @@
 package com.movies.mybakingapp.fragments;
 
-import android.app.Dialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,7 +53,9 @@ public class StepDetailFragment extends Fragment implements ExoPlayer.EventListe
     private static final String IS_PLAYER_PLAYING = "is_player_playing";
     private RecipeDetailViewModel detailViewModel;
     private SimpleExoPlayerView simpleExoPlayerView;
-    ImageView imageView;
+    private ConstraintLayout constraintLayout;
+    private TextView stepDetail;
+    private ImageView imageView;
     private long currentPlayerPosition;
     private boolean isPlayerPlaying = true;
     private PlaybackStateCompat.Builder playbackStateBuilder;
@@ -67,9 +72,12 @@ public class StepDetailFragment extends Fragment implements ExoPlayer.EventListe
         detailViewModel = ViewModelProviders.of(requireActivity()).get(RecipeDetailViewModel.class);
         detailViewModel.setStepClicked(true);
         final View rootView = inflater.inflate(R.layout.fragment_step_detail, container, false);
-        TextView stepDetail = rootView.findViewById(R.id.step_full_description);
+        stepDetail = rootView.findViewById(R.id.step_full_description);
         simpleExoPlayerView = rootView.findViewById(R.id.playerView);
         imageView = rootView.findViewById(R.id.step_image);
+        constraintLayout = rootView.findViewById(R.id.step_detail_layout);
+        ImageButton prevButton = rootView.findViewById(R.id.previous_button);
+        ImageButton nextButton = rootView.findViewById(R.id.next_button);
         if (detailViewModel.getLatestAvailableRecipe() == null) {
             detailViewModel.setCurrentRecipeValueFromDB();
         }
@@ -80,7 +88,13 @@ public class StepDetailFragment extends Fragment implements ExoPlayer.EventListe
         }
 
         if (savedInstanceState != null) {
-            Step currentStep = detailViewModel.getLatestAvailableRecipe().getStepsList().get(savedInstanceState.getInt(CURRENT_STEP_POSITION));
+            List<Step> stepList = detailViewModel.getLatestAvailableRecipe().getStepsList();
+            Step currentStep;
+            if(stepList.size() > savedInstanceState.getInt(CURRENT_STEP_POSITION)) {
+                currentStep = stepList.get(savedInstanceState.getInt(CURRENT_STEP_POSITION));
+            } else {
+                currentStep = stepList.get(0);
+            }
             detailViewModel.setCurrentStepDetails(currentStep);
             detailViewModel.setSelectedStepPosition(savedInstanceState.getInt(CURRENT_STEP_POSITION));
             currentPlayerPosition = savedInstanceState.getLong(CURRENT_PLAYER_POSITION);
@@ -89,7 +103,7 @@ public class StepDetailFragment extends Fragment implements ExoPlayer.EventListe
         }
 
         stepDetail.setText(detailViewModel.getStepLongDescription());
-        showMedia(imageView, simpleExoPlayerView);
+        showMedia(imageView, simpleExoPlayerView, stepDetail, nextButton, prevButton);
 
         setUpButtonViews(rootView.findViewById(R.id.previous_button),
                 rootView.findViewById(R.id.next_button));
@@ -152,9 +166,22 @@ public class StepDetailFragment extends Fragment implements ExoPlayer.EventListe
             initialisePlayer(simpleExoPlayerView, detailViewModel.getUri(), requireActivity());
             initialiseMediaSession(MEDIA_SESSION_TAG, detailViewModel.getPlayer());
         }
+
+        // Hide action bar and navigation in landscape view if player is available
+        if (getActivity().getResources() != null && getActivity().getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_LANDSCAPE && detailViewModel.getPlayer() != null && !detailViewModel.isTwoPaneMode()) {
+            // Hide action bar
+            ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
+            // Hide the status bar.
+            View decorView = requireActivity().getWindow().getDecorView();
+            int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
+            decorView.setSystemUiVisibility(uiOptions);
+        } else {
+            ((AppCompatActivity) getActivity()).getSupportActionBar().show();
+        }
     }
 
-    private void showMedia(ImageView imageView, SimpleExoPlayerView simpleExoPlayerView) {
+    private void showMedia(ImageView imageView, SimpleExoPlayerView simpleExoPlayerView, TextView stepDetail, ImageButton nextButton, ImageButton prevButton) {
         if (detailViewModel.isMediaAvailableForStep()) {
             if (detailViewModel.isUrlMp4()) {
                 imageView.setVisibility(View.GONE);
@@ -162,10 +189,17 @@ public class StepDetailFragment extends Fragment implements ExoPlayer.EventListe
                 simpleExoPlayerView.setDefaultArtwork(BitmapFactory.decodeResource(getResources(), R.drawable.grey_background));
             } else {
                 showImageInsteadOfVideo(simpleExoPlayerView, imageView);
+                constraintLayout.setBackgroundColor(getResources().getColor(R.color.cardview_light_background));
+                stepDetail.setVisibility(View.VISIBLE);
             }
         } else {
             simpleExoPlayerView.setVisibility(View.GONE);
             imageView.setVisibility(View.GONE);
+            constraintLayout.setBackgroundColor(getResources().getColor(R.color.cardview_light_background));
+            stepDetail.setVisibility(View.VISIBLE);
+            stepDetail.setText(detailViewModel.getStepLongDescription());
+            prevButton.setVisibility(View.GONE);
+            nextButton.setVisibility(View.GONE);
         }
         if (ConnectionUtils.isNetworkAvailable(requireActivity())) {
         } else {
